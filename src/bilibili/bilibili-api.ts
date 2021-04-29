@@ -52,22 +52,19 @@ export enum VoteType {
   Refuse,
 }
 
+export class Counts {
+  "voteRule": number
+  "voteBreak": number
+  "voteDelete": number
+}
+
 /**
  * 获取票数
  */
-export async function getVoteCount(
-  cid: CaseID,
-  config: { type: VoteType },
-): Promise<[number, Code]> {
-  let type = 1
-  if (VoteType.Approve === config.type) {
-    type = 1
-  } else if (VoteType.Refuse === config.type) {
-    type = 2
-  }
-
+ export async function getVoteCount(cid: CaseID): Promise<[Counts, Code]> {
+  let counts = new Counts
   const response = await fetch(
-    `//api.bilibili.com/x/credit/jury/vote/opinion?cid=${cid}&otype=${type}`,
+    `https://api.bilibili.com/x/credit/jury/caseInfo?cid=${cid}`,
     {
       method: 'GET',
       mode: 'cors',
@@ -75,8 +72,11 @@ export async function getVoteCount(
     },
   )
   const result = await response.json()
+  counts.voteRule = await result.data.voteRule
+  counts.voteBreak = await result.data.voteBreak
+  counts.voteDelete = await result.data.voteDelete
 
-  return [result.code === 0 ? result.data.count : -1, result.code]
+  return [counts, result.code]
 }
 
 /**

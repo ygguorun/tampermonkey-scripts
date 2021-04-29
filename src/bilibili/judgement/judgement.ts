@@ -89,10 +89,30 @@ async function main() {
     )
 
     // 被审理案件违规的情况更普遍，投票早期偶有发生投反对导致最终结果出现差异
-    const approve =
-      (await getVoteCount(cid, { type: VoteType.Approve }))[0] +
-        config.approveAlter >=
-      (await getVoteCount(cid, { type: VoteType.Refuse }))[0]
+    let approve = true
+    for (let i = 0; i < 10; i++) {
+      const countResult = await getVoteCount(cid)
+      if (countResult[1] !== 0) {
+        await delay(10 * 1000)
+        continue
+      }
+      
+      const sum = countResult[0].voteBreak +
+                  countResult[0].voteDelete +
+                  countResult[0].voteRule
+      setSlogan(
+        `(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})目前投票数${sum}`,
+      )
+      await delay(3 * 1000)
+      
+      // 总投票低于 100 时等待 30 s
+      if (sum < 100) {
+        await delay(30 * 1000)
+        continue
+      }
+      approve = countResult[0].voteRule / sum <= 0.5
+      break
+    }
 
     setSlogan(
       `(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})案件投${

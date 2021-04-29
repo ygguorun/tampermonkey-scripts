@@ -1,18 +1,18 @@
 // ==UserScript==
 // @name         Bilibili 风纪委员投票
 // @namespace    Bilibili
-// @version      0.7
+// @version      0.7.1
+// @change-log   0.7.1 修改票数获取方法
 // @change-log   0.7 fix任务完成后首页依旧打开投票问题
 // @change-log   0.6 添加匿名投票功能（原本就是匿名投票）、当日投票完成后自动关闭开关
 // @change-log   0.5 添加投票补偿、描述性文字
 //               案件刚开始审理时投票不多，少量票数不能反映总体趋势，添加补偿票数减少
 //               和主流意见差异。处理案件过程中在界面Slogan UI上添加描述状态的文字
 // @change-log   0.4 添加配置提交内容及投票间隔UI
-// @author       yyyyu
+// @author       ygguorun
 // @description  选择多数意见进行投票
 // @license      MIT
-// @homepage     https://github.com/yyyyu/tampermonkey-scripts
-// @downloadURL  https://raw.githubusercontent.com/yyyyu/tampermonkey-scripts/master/releases/bilibili-judgement.js
+// @homepage     https://github.com/ygguorun/tampermonkey-scripts
 // @icon         https://www.bilibili.com/favicon.ico
 // @match        https://www.bilibili.com
 // @match        https://www.bilibili.com/judgement*
@@ -106,22 +106,21 @@
         VoteType[VoteType["Approve"] = 0] = "Approve";
         VoteType[VoteType["Refuse"] = 1] = "Refuse";
     })(VoteType || (VoteType = {}));
-    function getVoteCount(cid, config) {
+    class Counts {
+    }
+    function getVoteCount(cid) {
         return __awaiter(this, void 0, void 0, function* () {
-            let type = 1;
-            if (VoteType.Approve === config.type) {
-                type = 1;
-            }
-            else if (VoteType.Refuse === config.type) {
-                type = 2;
-            }
-            const response = yield fetch(`//api.bilibili.com/x/credit/jury/vote/opinion?cid=${cid}&otype=${type}`, {
+            let counts = new Counts;
+            const response = yield fetch(`https://api.bilibili.com/x/credit/jury/caseInfo?cid=${cid}`, {
                 method: 'GET',
                 mode: 'cors',
                 credentials: 'include',
             });
             const result = yield response.json();
-            return [result.code === 0 ? result.data.count : -1, result.code];
+            counts.voteRule = yield result.data.voteRule;
+            counts.voteBreak = yield result.data.voteBreak;
+            counts.voteDelete = yield result.data.voteDelete;
+            return [counts, result.code];
         });
     }
     function vote(cid, config) {
@@ -287,9 +286,25 @@
                     return;
                 }
                 setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})获取案件票数...`);
-                const approve = (yield getVoteCount(cid, { type: VoteType.Approve }))[0] +
-                    config.approveAlter >=
-                    (yield getVoteCount(cid, { type: VoteType.Refuse }))[0];
+                let approve = true;
+                for (let i = 0; i < 10; i++) {
+                    const countResult = yield getVoteCount(cid);
+                    if (countResult[1] !== 0) {
+                        yield delay(10 * 1000);
+                        continue;
+                    }
+                    const sum = countResult[0].voteBreak +
+                        countResult[0].voteDelete +
+                        countResult[0].voteRule;
+                    setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})目前投票数${sum}`);
+                    yield delay(3 * 1000);
+                    if (sum < 100) {
+                        yield delay(30 * 1000);
+                        continue;
+                    }
+                    approve = countResult[0].voteRule / sum <= 0.5;
+                    break;
+                }
                 setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})案件投${approve ? '赞成' : '反对'}票...`);
                 yield vote(cid, {
                     approve,
