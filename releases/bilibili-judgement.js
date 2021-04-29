@@ -265,8 +265,8 @@
                     code = result[1];
                 }
                 if (JudgementCode.NoCase === code) {
-                    setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})当前无案件，5s后自动重试`);
-                    yield delay(5000);
+                    setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})当前无案件，5min 后自动重试`);
+                    yield delay(5 * 60 * 1000);
                     continue;
                 }
                 if (JudgementCode.Finished === code) {
