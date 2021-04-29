@@ -1,0 +1,21 @@
+{
+  "name": "tampermonkey-scripts",
+  "version": "1.0.0",
+  "description": "personal tampermonkey scripts.",
+  "homepage": "https://github.com/ygguorun/tampermonkey-scripts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ygguorun/tampermonkey-scripts"
+  },
+  "scripts": {
+    "build:bi": "rollup -c src/bilibili/judgement/build.rollup.js"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^3.0.0",
+    "@types/tampermonkey": "^4.0.0",
+    "rollup": "^1.31.0",
+    "tslib": "^2.0.0",
+    "typescript": "^3.7.5"
+  }
+}
