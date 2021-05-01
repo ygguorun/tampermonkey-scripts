@@ -1504,6 +1504,7 @@ $(document).ready(function () {
                     { name: '凌风云搜书', link: 'https://www.lingfengyun.com/search?wd=' + title + '&so_file=wang_pan&so_source=all_pan&so_ext=4&so_array=&so_accur=100', csrf: {name: "so_token", update:"link"}, rewrite_href: true, selector: '.x-box__text' },
                     { name: '小白盘图书', link: 'http://www.xiaobaipan.com/list-' + title + '.html?order=size', selector: 'h4.job-title a' },
                     { name: '云盘精灵书', link: 'https://www.yunpanjingling.com/search/' + title + '?filter_mode=ebook', selector: 'div.search-list div.name' },
+                    { name: '随机阅读', link: 'https://pan.shudan.vip/operate-search-'+ title + '-1.html', selector: 'h2.h6' },
                 ]
             });
             site_map.push({
