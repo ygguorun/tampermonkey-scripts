@@ -304,9 +304,9 @@
                         yield delay(30 * 1000);
                         continue;
                     }
-                    if (voteRule / sum >= 0.45)
+                    if (voteRule / sum >= 0.4)
                         judgeResult = 2;
-                    else if (voteBreak / (voteBreak + voteDelete) >= 0.65)
+                    else if (voteBreak / (voteBreak + voteDelete) >= 0.4)
                         judgeResult = 1;
                     else
                         judgeResult = 4;
