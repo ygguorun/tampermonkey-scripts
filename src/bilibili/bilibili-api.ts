@@ -81,16 +81,19 @@ export class Counts {
 
 /**
  * 投票
+ * 
+ * 投票类型代码
+ * 1（封禁） 2（否） 3 （弃权） 4（删除）
  */
 export async function vote(
   cid: CaseID,
   config: {
-    approve: boolean
+    judgeResult: number
     anonymous: boolean
     content: string
   },
 ): Promise<[boolean, Code]> {
-  const approve = config.approve ? 4 : 2
+  const judgeResult = String(config.judgeResult)
   const anonymous = config.anonymous ? 0 : 1
   const content = encodeURIComponent(config.content)
   const csrf = getCookie('bili_jct')
@@ -102,7 +105,7 @@ export async function vote(
     },
     mode: 'cors',
     credentials: 'include',
-    body: `cid=${cid}&vote=${approve}&content=${content}&attr=${anonymous}&csrf=${csrf}`,
+    body: `cid=${cid}&vote=${judgeResult}&content=${content}&attr=${anonymous}&csrf=${csrf}`,
   })
   const result = await response.json()
 

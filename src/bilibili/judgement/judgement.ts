@@ -36,7 +36,7 @@ async function main() {
     if (result > 0) {
       queryCid = result
     }
-  } catch {}
+  } catch { }
 
   while (true) {
     setSlogan(
@@ -88,42 +88,51 @@ async function main() {
       `(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})获取案件票数...`,
     )
 
-    // 被审理案件违规的情况更普遍，投票早期偶有发生投反对导致最终结果出现差异
-    let approve = true
+    let judgeResult = 4
     for (let i = 0; i < 10; i++) {
       const countResult = await getVoteCount(cid)
       if (countResult[1] !== 0) {
         await delay(10 * 1000)
         continue
       }
-      
-      const sum = countResult[0].voteBreak +
-                  countResult[0].voteDelete +
-                  countResult[0].voteRule
+
+      const voteBreak = countResult[0].voteBreak
+      const voteDelete = countResult[0].voteDelete
+      const voteRule = countResult[0].voteRule
+      const sum = voteBreak + voteDelete + voteRule
+
       setSlogan(
         `(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})目前投票数${sum}`,
       )
       await delay(3 * 1000)
-      
+
       // 总投票低于 100 时等待 30 s
-      if (sum < 100) {
+      if (sum < 300) {
         await delay(30 * 1000)
         continue
       }
-      approve = countResult[0].voteRule / sum <= 0.5
+
+      // 裁决结果判断
+      if (voteRule / sum >= 0.45) 
+        judgeResult = 2
+      else if (voteBreak / (voteBreak + voteDelete) >= 0.65) 
+        judgeResult = 1
+      else 
+        judgeResult = 4
+
       break
     }
 
     setSlogan(
       `(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})案件投${
-        approve ? '赞成' : '反对'
+        judgeResult !== 2 ? '赞成' : '反对'
       }票...`,
     )
 
     await vote(cid, {
-      approve,
+      judgeResult,
       anonymous: config.anonymous,
-      content: approve ? config.approveText : config.refuseText,
+      content: judgeResult !== 2 ? config.approveText : config.refuseText,
     })
 
     config.todayCompletedCount++

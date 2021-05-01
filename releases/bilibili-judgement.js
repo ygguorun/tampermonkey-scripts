@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name         Bilibili 风纪委员投票
 // @namespace    Bilibili
-// @version      0.7.1
+// @version      0.7.2
+// @change-log   0.7.2 修改裁决结果判定策略
 // @change-log   0.7.1 修改票数获取方法
 // @change-log   0.7 fix任务完成后首页依旧打开投票问题
 // @change-log   0.6 添加匿名投票功能（原本就是匿名投票）、当日投票完成后自动关闭开关
@@ -125,7 +126,7 @@
     }
     function vote(cid, config) {
         return __awaiter(this, void 0, void 0, function* () {
-            const approve = config.approve ? 4 : 2;
+            const judgeResult = String(config.judgeResult);
             const anonymous = config.anonymous ? 0 : 1;
             const content = encodeURIComponent(config.content);
             const csrf = getCookie('bili_jct');
@@ -136,7 +137,7 @@
                 },
                 mode: 'cors',
                 credentials: 'include',
-                body: `cid=${cid}&vote=${approve}&content=${content}&attr=${anonymous}&csrf=${csrf}`,
+                body: `cid=${cid}&vote=${judgeResult}&content=${content}&attr=${anonymous}&csrf=${csrf}`,
             });
             const result = yield response.json();
             return [result.code === 0, result.code];
@@ -286,30 +287,36 @@
                     return;
                 }
                 setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})获取案件票数...`);
-                let approve = true;
+                let judgeResult = 4;
                 for (let i = 0; i < 10; i++) {
                     const countResult = yield getVoteCount(cid);
                     if (countResult[1] !== 0) {
                         yield delay(10 * 1000);
                         continue;
                     }
-                    const sum = countResult[0].voteBreak +
-                        countResult[0].voteDelete +
-                        countResult[0].voteRule;
+                    const voteBreak = countResult[0].voteBreak;
+                    const voteDelete = countResult[0].voteDelete;
+                    const voteRule = countResult[0].voteRule;
+                    const sum = voteBreak + voteDelete + voteRule;
                     setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})目前投票数${sum}`);
                     yield delay(3 * 1000);
-                    if (sum < 100) {
+                    if (sum < 300) {
                         yield delay(30 * 1000);
                         continue;
                     }
-                    approve = countResult[0].voteRule / sum <= 0.5;
+                    if (voteRule / sum >= 0.45)
+                        judgeResult = 2;
+                    else if (voteBreak / (voteBreak + voteDelete) >= 0.65)
+                        judgeResult = 1;
+                    else
+                        judgeResult = 4;
                     break;
                 }
-                setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})案件投${approve ? '赞成' : '反对'}票...`);
+                setSlogan(`(${config.todayCompletedCount}/${Config.MAX_DAILY_CASE_COUNT})案件投${judgeResult !== 2 ? '赞成' : '反对'}票...`);
                 yield vote(cid, {
-                    approve,
+                    judgeResult,
                     anonymous: config.anonymous,
-                    content: approve ? config.approveText : config.refuseText,
+                    content: judgeResult !== 2 ? config.approveText : config.refuseText,
                 });
                 config.todayCompletedCount++;
                 let intervel = config.voteMinInterval + Math.round(Math.random() * 2) * 1000;
