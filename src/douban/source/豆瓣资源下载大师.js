@@ -20,26 +20,28 @@
 // @include        https://bangumi.moe/search/title*
 // @include        https://desitorrents.tv/*
 // @include        http://www.dingzi66.com/q*
-// @version        7.9.3
+// @version        8.0.0
 // @icon           https://img3.doubanio.com/favicon.ico
 // @run-at         document-end
 // @namespace      doveboy_js
 // ==/UserScript==
- 
+
+/* global $, jQuery, encodeToGb2312 */
+
 // This Userscirpt can't run under Greasemonkey 4.x platform
 if (typeof GM_xmlhttpRequest === "undefined") {
     alert("不支持Greasemonkey 4.x，请换用暴力猴或Tampermonkey");
     return;
 }
- 
+
 // 不属于豆瓣的页面
 if (!/douban.com/.test(location.host)) {
     function AutoSearch(host, zInputSelector, btnSelector, dict) {
         if (location.host === host) {
-            let match = location.href.match(/#search_(.+)/);  // 从url的hash部分获取搜索关键词
+            let match = location.href.match(/#search_(.+)/); // 从url的hash部分获取搜索关键词
             if (match) {
                 history.pushState("", document.title, window.location.pathname + window.location.search); // 清空hash
-                window.addEventListener("load", function () {  // 等待页面完全加载完成
+                window.addEventListener("load", function () { // 等待页面完全加载完成
                     let zInput = $(zInputSelector);
                     zInput.val(decodeURIComponent(match[1])); // 填入搜索值
                     dict = $.extend({}, dict);
@@ -48,7 +50,7 @@ if (!/douban.com/.test(location.host)) {
                         changeEvent.initEvent("change", true, true);
                         zInput[0].dispatchEvent(changeEvent);
                     }
-                    if (dict.notarget) {  // 取消form的提交跳转
+                    if (dict.notarget) { // 取消form的提交跳转
                         $(btnSelector).parents("form").attr("target", "_self");
                     }
                     $(btnSelector).click(); // 模拟点击
@@ -56,28 +58,263 @@ if (!/douban.com/.test(location.host)) {
             }
         }
     }
- 
+
     AutoSearch("bangumi.moe", '#filter-tag-list div.torrent-title-search > md-input-group > input', '#filter-tag-list > div.torrent-search > div:nth-child(3) > button:nth-child(4)', { ang: true });
     AutoSearch("desitorrents.tv", 'input.search_string_input', 'input.search_string_input+img', {});
     AutoSearch("www.dingzi66.com", '#keyword', '#searchBtn', {});
- 
+
     return; // 终止脚本运行，防止豆瓣的css以及js片段等污染页面
 }
- 
+
 // 注入脚本相关的CSS，包括：隐藏、调整豆瓣原先的元素，脚本页面样式
-let myScriptStyle = "@charset utf-8;#dale_movie_subject_top_right,#dale_movie_subject_top_right,#dale_movie_subject_top_midle,#dale_movie_subject_middle_right,#dale_movie_subject_bottom_super_banner,#footer,#dale_movie_subject_download_middle,#dale_movie_subject_inner_middle,#movie_home_left_bottom,#dale_movie_home_top_right,#dale_movie_home_side_top,#dale_movie_home_bottom_right,#dale_movie_home_inner_bottom,#dale_movie_home_download_bottom,#dale_movie_home_bottom_right_down,#dale_movie_towhome_explore_right,#dale_movie_chart_top_right,#dale_movie_tags_top_right,#dale_review_best_top_right,.mobile-app-entrance.block5.app-movie,.qrcode-app,.top-nav-doubanapp,.extra,div.gray_ad,p.pl,div.ticket{display:none}.c-aside{margin-bottom:30px}.c-aside-body{*letter-spacing:normal}.c-aside-body a{border-radius:6px;color:#37A;display:inline-block;letter-spacing:normal;margin:0 8px 8px 0;padding:0 8px;text-align:center;width:65px}.c-aside-body a:link,.c-aside-body a:visited{background-color:#f5f5f5;color:#37A}.c-aside-body a:hover,.c-aside-body a:active{background-color:#e8e8e8;color:#37A}.c-aside-body a.available{background-color:#5ccccc;color:#006363}.c-aside-body a.available:hover,.c-aside-body a.available:active{background-color:#3cc}.c-aside-body a.sites_r0{text-decoration:line-through}#c_dialog li{margin:10px}#c_dialog{text-align:center}#interest_sectl .rating_imdb{border-top:1px solid #eaeaea;border-bottom:1px solid #eaeaea;padding-bottom:0}#interest_sectl .rating_wrap{padding-top:15px}#interest_sectl .rating_more{border-bottom:1px solid #eaeaea;color:#9b9b9b;margin:0;padding:15px 0;position:relative}#interest_sectl .rating_more a{left:80px;position:absolute}#interest_sectl .rating_more .titleOverviewSprite{background:url(https://coding.net/u/Changhw/p/MyDoubanMovieHelper/git/raw/master/title_overview_sprite.png) no-repeat;display:inline-block;vertical-align:middle}#interest_sectl .rating_more .popularityImageUp{background-position:-14px -478px;height:8px;width:8px}#interest_sectl .rating_more .popularityImageDown{background-position:-34px -478px;height:8px;width:8px}#interest_sectl .rating_more .popularityUpOrFlat{color:#83c40b}#interest_sectl .rating_more .popularityDown{color:#930e02}.more{display:block;height:34px;line-height:34px;text-align:center;font-size:14px;background:#f7f7f7}div#drdm_setting input[type=checkbox]{display:none}div#drdm_setting input[type=checkbox]+label{display:inline-block;width:40px;height:20px;position:relative;transition:.3s;margin:0 20px;box-sizing:border-box;background:#ddd;border-radius:20px;box-shadow:1px 1px 3px #aaa}div#drdm_setting input[type=checkbox]+label:after,div#drdm_setting input[type=checkbox]+label:before{content:'';display:block;position:absolute;left:0;top:0;width:20px;height:20px;transition:.3s;cursor:pointer}div#drdm_setting input[type=checkbox]+label:after{background:#fff;border-radius:50%;box-shadow:1px 1px 3px #aaa}div#drdm_setting input[type=checkbox]:checked+label{background:#aedcae}div#drdm_setting input[type=checkbox]:checked+label:after{background:#5cb85c;left:calc(100% - 20px)}.top250{background:url(https://s.doubanio.com/f/movie/f8a7b5e23d00edee6b42c6424989ce6683aa2fff/pics/movie/top250_bg.png) no-repeat;width:150px;margin-right:5px;font:12px Helvetica,Arial,sans-serif;margin:5px 0;color:#744900}.top250 span{display:inline-block;text-align:center;height:18px;line-height:18px}.top250 a,.top250 a:link,.top250 a:hover,.top250 a:active,.top250 a:visited{color:#744900;text-decoration:none;background:0}.top250-no{width:34%}.top250-link{width:66%}.drdm-dl-horizontal dt{float:left;width:160px;overflow:hidden;clear:left;text-align:right;text-overflow:ellipsis;white-space:nowrap}.drdm-dl-horizontal dd{margin-left:180px}";
-GM_addStyle(myScriptStyle);
- 
+GM_addStyle(`
+.c-aside {
+	margin-bottom: 30px
+}
+
+.c-aside-body {
+	*letter-spacing: normal
+}
+
+.c-aside-body a {
+	border-radius: 6px;
+	color: #37A;
+	display: inline-block;
+	letter-spacing: normal;
+	margin: 0 8px 8px 0;
+	padding: 0 8px;
+	text-align: center;
+	width: 65px
+}
+
+.c-aside-body a:link,
+.c-aside-body a:visited {
+	background-color: #f5f5f5;
+	color: #37A
+}
+
+.c-aside-body a:hover,
+.c-aside-body a:active {
+	background-color: #e8e8e8;
+	color: #37A
+}
+
+.c-aside-body a.available {
+	background-color: #5ccccc;
+	color: #006363
+}
+
+.c-aside-body a.available:hover,
+.c-aside-body a.available:active {
+	background-color: #3cc
+}
+
+.c-aside-body a.sites_r0 {
+	text-decoration: line-through
+}
+
+#c_dialog li {
+	margin: 10px
+}
+
+#c_dialog {
+	text-align: center
+}
+
+#interest_sectl .rating_imdb {
+	border-top: 1px solid #eaeaea;
+	border-bottom: 1px solid #eaeaea;
+	padding-bottom: 0
+}
+
+#interest_sectl .rating_wrap {
+	padding-top: 15px
+}
+
+#interest_sectl .rating_more {
+	border-bottom: 1px solid #eaeaea;
+	color: #9b9b9b;
+	margin: 0;
+	padding: 15px 0;
+	position: relative
+}
+
+#interest_sectl .rating_more a {
+	left: 80px;
+	position: absolute
+}
+
+#interest_sectl .rating_more .titleOverviewSprite {
+	background: url(https://coding.net/u/Changhw/p/MyDoubanMovieHelper/git/raw/master/title_overview_sprite.png) no-repeat;
+	display: inline-block;
+	vertical-align: middle
+}
+
+#interest_sectl .rating_more .popularityImageUp {
+	background-position: -14px -478px;
+	height: 8px;
+	width: 8px
+}
+
+#interest_sectl .rating_more .popularityImageDown {
+	background-position: -34px -478px;
+	height: 8px;
+	width: 8px
+}
+
+#interest_sectl .rating_more .popularityUpOrFlat {
+	color: #83c40b
+}
+
+#interest_sectl .rating_more .popularityDown {
+	color: #930e02
+}
+
+.more {
+	display: block;
+	height: 34px;
+	line-height: 34px;
+	text-align: center;
+	font-size: 14px;
+	background: #f7f7f7
+}
+
+div#drdm_setting input[type=checkbox] {
+	display: none
+}
+
+div#drdm_setting input[type=checkbox]+label {
+	display: inline-block;
+	width: 40px;
+	height: 20px;
+	position: relative;
+	transition: .3s;
+	margin: 0 20px;
+	box-sizing: border-box;
+	background: #ddd;
+	border-radius: 20px;
+	box-shadow: 1px 1px 3px #aaa
+}
+
+div#drdm_setting input[type=checkbox]+label:after,
+div#drdm_setting input[type=checkbox]+label:before {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 20px;
+	height: 20px;
+	transition: .3s;
+	cursor: pointer
+}
+
+div#drdm_setting input[type=checkbox]+label:after {
+	background: #fff;
+	border-radius: 50%;
+	box-shadow: 1px 1px 3px #aaa
+}
+
+div#drdm_setting input[type=checkbox]:checked+label {
+	background: #aedcae
+}
+
+div#drdm_setting input[type=checkbox]:checked+label:after {
+	background: #5cb85c;
+	left: calc(100% - 20px)
+}
+
+.top250 {
+	background: url(https://s.doubanio.com/f/movie/f8a7b5e23d00edee6b42c6424989ce6683aa2fff/pics/movie/top250_bg.png) no-repeat;
+	width: 150px;
+	margin-right: 5px;
+	font: 12px Helvetica, Arial, sans-serif;
+	margin: 5px 0;
+	color: #744900
+}
+
+.top250 span {
+	display: inline-block;
+	text-align: center;
+	height: 18px;
+	line-height: 18px
+}
+
+.top250 a,
+.top250 a:link,
+.top250 a:hover,
+.top250 a:active,
+.top250 a:visited {
+	color: #744900;
+	text-decoration: none;
+	background: 0
+}
+
+.top250-no {
+	width: 34%
+}
+
+.top250-link {
+	width: 66%
+}
+
+.drdm-dl-horizontal dt {
+	float: left;
+	width: 160px;
+	overflow: hidden;
+	clear: left;
+	text-align: right;
+	text-overflow: ellipsis;
+	white-space: nowrap
+}
+
+.drdm-dl-horizontal dd {
+	margin-left: 180px
+}
+`);
+
+if (GM_getValue('enable_extra_stylesheet', true)) {
+    GM_addStyle(`
+    #dale_movie_subject_top_right,
+    #dale_movie_subject_top_right,
+    #dale_movie_subject_top_midle,
+    #dale_movie_subject_middle_right,
+    #dale_movie_subject_bottom_super_banner,
+    #footer,
+    #dale_movie_subject_download_middle,
+    #dale_movie_subject_inner_middle,
+    #movie_home_left_bottom,
+    #dale_movie_home_top_right,
+    #dale_movie_home_side_top,
+    #dale_movie_home_bottom_right,
+    #dale_movie_home_inner_bottom,
+    #dale_movie_home_download_bottom,
+    #dale_movie_home_bottom_right_down,
+    #dale_movie_towhome_explore_right,
+    #dale_movie_chart_top_right,
+    #dale_movie_tags_top_right,
+    #dale_review_best_top_right,
+    .mobile-app-entrance.block5.app-movie,
+    .qrcode-app,
+    .top-nav-doubanapp,
+    .extra,
+    div.gray_ad,
+    div.ticket {
+        display: none
+    }
+    `);
+}
+
 // -- 定义基础方法 --
- 
+
 // 对使用GM_xmlhttpRequest返回的html文本进行处理并返回DOM树
 function page_parser(responseText) {
     // 替换一些信息防止图片和页面脚本的加载，同时可能加快页面解析速度
-    responseText = responseText.replace(/s+src=/ig, ' data-src='); // 图片，部分外源脚本
-    responseText = responseText.replace(/<script[^>]*?>[\S\s]*?<\/script>/ig, ''); //页面脚本
+    // responseText = responseText.replace(/s+src=/ig, ' data-src='); // 图片，部分外源脚本
+    // responseText = responseText.replace(/<script[^>]*?>[\S\s]*?<\/script>/ig, ''); //页面脚本
     return (new DOMParser()).parseFromString(responseText, 'text/html');
 }
- 
+
 function getDoc(url, meta, callback) {
     GM_xmlhttpRequest({
         method: 'GET',
@@ -90,7 +327,7 @@ function getDoc(url, meta, callback) {
         }
     });
 }
- 
+
 function getJSON(url, callback) {
     GM_xmlhttpRequest({
         method: 'GET',
@@ -107,31 +344,36 @@ function getJSON(url, callback) {
         }
     });
 }
- 
+
+function getValueFromObject (object, path) {
+    if (typeof path === "string") path = path.split(".").filter(key => key.length);
+    return path.reduce((dive, key) => dive && dive[key], object);
+};
+
 // 缓存相关方法
 function CacheStorage(name, expire = null) {
     let now = Date.now();
     let cache_name = "drdm_cache_" + (name ? name : 'default');
- 
+
     if (localStorage[cache_name + "_exp"]) {
         if (now > localStorage[cache_name + "_exp"]) {
             localStorage.removeItem(cache_name);
         }
     }
- 
+
     let cache = localStorage[cache_name] ? JSON.parse(localStorage[cache_name]) : {};
     localStorage.setItem(cache_name + "_exp", now + expire);
- 
+
     return {
         flush: function () {
             localStorage.setItem(cache_name, JSON.stringify(cache));
         },
- 
+
         add: function (name, value) {
             cache[name] = value;
             this.flush();
         },
- 
+
         del: function (name) {
             if (name) {
                 delete cache[name];
@@ -140,7 +382,7 @@ function CacheStorage(name, expire = null) {
                 localStorage.removeItem(cache_name);
             }
         },
- 
+
         get: function (name, def = null) {
             if (name) {
                 return cache[name] ? cache[name] : def;
@@ -150,17 +392,17 @@ function CacheStorage(name, expire = null) {
         }
     }
 }
- 
+
 function clearExpiredCacheValue(force) {
     let StorageKey = [];
     for (let i = 0, len = localStorage.length; i < len; ++i) { // 先从里面取出所有的key
         StorageKey.push(localStorage.key(i));
     }
- 
+
     let CacheKey = StorageKey.filter(function (x) {
         return x && x.match(/(drdm_cache_.+)_exp/);
     }); // 再从中提取出本脚本缓存的键值
- 
+
     for (let i = 0,len = CacheKey.length ; i < len ; ++i) {
         let key_name = CacheKey[i];
         let exp_at = localStorage.getItem(key_name);
@@ -170,19 +412,19 @@ function clearExpiredCacheValue(force) {
         }
     }
 }
- 
+
 let _version = GM_getValue("version", "轻量版");
 let delete_site_prefix = "delete_site_";
- 
+
 if (typeof GM_registerMenuCommand !== "undefined") {
- 
+
     function changeVersionConfirm() {
         if (confirm(`你当前版本是 ${_version}，是否进行切换？`)) {
             GM_setValue("version", _version === "完整版" ? "轻量版" : "完整版");
         }
     }
     GM_registerMenuCommand("脚本功能切换", changeVersionConfirm);
- 
+
     function changeTagBColor() {
         let now_bcolor_list = [GM_getValue("tag_bcolor_exist", "#e3f1ed"), GM_getValue("tag_bcolor_not_exist", "#f4eac2"), GM_getValue("tag_bcolor_need_login", ""), GM_getValue("tag_bcolor_error", "")];
         let name = prompt("请依次输入代表'资源存在','资源不存在','站点需要登陆','站点解析错误'颜色的Hex值，并用英文逗号分割。当前值为：", `${now_bcolor_list.join(',')}`);
@@ -199,7 +441,7 @@ if (typeof GM_registerMenuCommand !== "undefined") {
         }
     }
     GM_registerMenuCommand("更改标签背景色", changeTagBColor);
- 
+
     function changeTagFColor() {
         let now_fcolor_list = [GM_getValue("tag_fcolor_exist", "#3377aa"), GM_getValue("tag_fcolor_not_exist", "#3377aa"), GM_getValue("tag_fcolor_need_login", "#3377aa"), GM_getValue("tag_fcolor_error", "#3377aa")];
         let name = prompt("请依次输入代表'资源存在','资源不存在','站点需要登陆','站点解析错误'颜色的Hex值，并用英文逗号分割。当前值为：", `${now_fcolor_list.join(',')}`);
@@ -216,7 +458,7 @@ if (typeof GM_registerMenuCommand !== "undefined") {
         }
     }
     GM_registerMenuCommand("更改标签文字色", changeTagFColor);
- 
+
     function forceCacheClear() {
         if (confirm("清空所有缓存信息（包括资源存在情况、登陆情况等）")) {
             clearExpiredCacheValue(true);
@@ -224,28 +466,33 @@ if (typeof GM_registerMenuCommand !== "undefined") {
     }
     GM_registerMenuCommand("清空脚本缓存", forceCacheClear);
 }
- 
- 
+
+
 let fetch_anchor = function (anchor) {
     return anchor[0].nextSibling.nodeValue.trim();
 };
- 
+
 function starBlock(source, source_link, _rating, _vote, max = 10) {
     let starValue = parseFloat(_rating) / 2;
     starValue = starValue % 1 > 0.5 ? Math.floor(starValue) + 0.5 : Math.floor(starValue);
     starValue *= (100 / max);
- 
+
     return `<div class=rating_logo >${source} 评分</div><div class="rating_self clearfix" typeof="v:Rating"><strong class="ll rating_num" property="v:average">${parseFloat(_rating).toFixed(1)}</strong><span property="v:best" content=10.0 ></span><div class="rating_right "><div class="ll bigstar ${'bigstar' + starValue}"></div><div class="rating_sum"> <a href=${source_link}  class=rating_people target="_blank"><span property="v:votes">${_vote}</span>人${source === "MAL" ? "观看" : "评价"}</a> </div> </div> </div>`
 }
- 
+
+function parseLdJson (raw) {
+    return JSON.parse(raw.replace(/\n/ig,''));
+}
+
+
 $(document).ready(function () {
     let douban_link, douban_id;
- 
-    douban_link = 'https://' + location.href.match(/douban.com\/subject\/\d+\//);  //豆瓣链接
+
+    douban_link = 'https://' + location.href.match(/douban.com\/subject\/\d+\//); //豆瓣链接
     douban_id = location.href.match(/(\d{7,8})/g);
- 
+
     let site_map = [];
- 
+
     /** label对象键值说明：
      * name:          String  站点名称，请注意该站点名称在不同的site_map中也应该唯一，以免脚本后续判断出错
      * method：       String  搜索请求方式，默认值为 "GET"
@@ -267,10 +514,10 @@ $(document).ready(function () {
      *        2. 关于请求方法请参考：https://github.com/scriptish/scriptish/wiki/GM_xmlhttpRequest
      * */
     if (douban_id) {
-        clearExpiredCacheValue(false);  // 清理缓存
+        clearExpiredCacheValue(false); // 清理缓存
         let cache = CacheStorage(douban_id, 86400 * 7 * 1e3);
         let need_login_cache = CacheStorage("need_login", 86400 * 1e3);
- 
+
         $("#content div.aside").prepend(`<div id="drdm_req_status" style="color: #C65E24;background: #F4F4EC; padding: 10px; margin-bottom: 20px; word-wrap: break-word;display: none;">
 <div style="text-align: center;">豆瓣资源下载大师 - 资源搜索情况 <a href="javascript:void();" id="drdm_req_status_hide">(隐藏)</a> <hr></div>
 <p id="drdm_dep_notice" style="color: #C65E24;display:none;">脚本未完全加载，部分站点将受影响。请确保网络稳定或尝试重新刷新页面。</p>
@@ -289,25 +536,25 @@ $(document).ready(function () {
             $('#adv-sites > div.c-aside.name-offline').each(function () {let that = $(this); if (that.find('> div > ul > a:visible').length == 0) {that.hide()}});
         });
         $("#drdm_show_all").click(function () { $("#adv-sites a:hidden").show(); $('#adv-sites > div.c-aside.name-offline').show(); });
- 
+
         let update_status_interval;
- 
+
         function update_req_status() {
             let asking_length = $("#adv-sites a[title=\"正在请求信息中\"]").length;
- 
+
             $("#drdm_req_success").text($("#adv-sites a[title=\"资源存在\"]").length);
             $("#drdm_req_asking").text(asking_length);
             $("#drdm_req_noexist").text($("#adv-sites a[title=\"资源不存在\"]").length);
             $("#drdm_req_fail").text($("#adv-sites a[title=\"站点需要登陆\"]").length + $("#adv-sites a[title=\"遇到问题\"]").length);
- 
+
             if (asking_length === 0) {
-                clearInterval(update_status_interval);  // 当所有请求完成后清除定时器
+                clearInterval(update_status_interval); // 当所有请求完成后清除定时器
                 if (GM_getValue('enalbe_adv_auto_tip_hide', false)) {
                     $("#drdm_req_status_hide").click();
                 }
             }
         }
- 
+
         function _encodeToGb2312(str, opt) {
             let ret = "";
             try {
@@ -318,10 +565,10 @@ $(document).ready(function () {
             }
             return ret;
         }
- 
+
         if (location.host === "movie.douban.com") {
             // 查看原图
-            if ($('#mainpic p.gact').length === 0) {  // 在未登录的情况下添加空白元素以方便查看原图交互按钮的定位
+            if ($('#mainpic p.gact').length === 0) { // 在未登录的情况下添加空白元素以方便查看原图交互按钮的定位
                 $("#mainpic").append("<p class=\"gact\"></p>");
             }
             let posterAnchor = document.querySelector('#mainpic > a > img');
@@ -331,13 +578,13 @@ $(document).ready(function () {
                 rawUrl = postersUrl.replace(/photo\/[sl](_ratio_poster|pic)\/public\/(p\d+).+$/, "photo/raw/public/$2.jpg");
                 $('#mainpic p.gact').after(`<a target="_blank" rel="nofollow" href="${rawUrl}">查看原图</a>`);
             }
- 
+
             // 调整底下剧情简介的位置
             let interest_sectl_selector = $('#interest_sectl');
             interest_sectl_selector.after($('div.grid-16-8 div.related-info'));
             interest_sectl_selector.attr('style', 'float:right');
             $('div.related-info').attr('style', 'width:480px;float:left');
- 
+
             // Movieinfo信息生成相关
             let this_title, trans_title, aka;
             let year, region, genre, language, playdate;
@@ -346,16 +593,16 @@ $(document).ready(function () {
             let episodes, duration;
             let director, writer, cast;
             let tags, introduction, awards;
-            
+
             // 获得 <script type="application/ld+json" /> 里面的信息，这里面的东西和API返回需要的东西差不多
             let ld_json;
             try {
-               ld_json = JSON.parse($('head > script[type="application/ld+json"]').text().replace(/\n/ig,''));
+                ld_json = parseLdJson($('head > script[type="application/ld+json"]').text());
             } catch (e) {}
- 
+
             // 增加Mediainfo的交互按钮与监听
             if (GM_getValue("enable_mediainfo_gen", false)) {
-                $("div#info").append("<span class=\"pl\">生成信息: </span><a id='movieinfogen' href='javascript:void(0);'>movieinfo</a><br/>");
+                $("div#info").append("<br><span class=\"pl\">生成信息: </span><a id='movieinfogen' href='javascript:void(0);'>movieinfo</a>");
                 $("div.related-info").before("<div class='c-aside' style='float:left;margin-top:20px;width: 470px;display: none' id='movieinfo_div'><h2><i>电影简介</i>· · · · · · </h2><a href='javascript:void(0);' id='copy_movieinfo'>点击复制</a><div class=\"c-aside-body\" style=\"padding: 0 12px;\" id='movieinfo'></div></div>");
                 $("a#movieinfogen").click(function () {
                     let descr = "";
@@ -367,7 +614,7 @@ $(document).ready(function () {
                     descr += genre ? `◎类　　别　${genre}\n` : "";
                     descr += language ? `◎语　　言　${language}\n` : "";
                     descr += playdate ? `◎上映日期　${playdate}\n` : "";
-                    descr += imdb_rating ? `◎IMDb评分  ${imdb_rating}\n` : "";  // 注意如果长时间没能请求完成imdb信息，则该条不显示
+                    descr += imdb_rating ? `◎IMDb评分  ${imdb_rating}\n` : ""; // 注意如果长时间没能请求完成imdb信息，则该条不显示
                     descr += imdb_link ? `◎IMDb链接  ${imdb_link}\n` : "";
                     descr += douban_rating ? `◎豆瓣评分　${douban_rating}\n` : "";
                     descr += douban_link ? `◎豆瓣链接　${douban_link}\n` : "";
@@ -388,33 +635,35 @@ $(document).ready(function () {
                     $(this).text("复制成功");
                 });
             }
- 
+
             // 先对一些关键信息进行判断
             let aka_anchor = $('#info span.pl:contains("又名")');
             let has_aka = aka_anchor.length > 0;
-            let has_imdb = $('div#info a[href^=\'https://www.imdb.com/title/tt\']').length > 0;
             let is_movie = $("a.bn-sharing[data-type='电影']").length > 0;
             let is_series = $("a.bn-sharing[data-type='电视剧']").length > 0;
             let is_anime = $('span[property="v:genre"]:contains("动画")').length > 0;
             let is_document = $('span[property="v:genre"]:contains("纪录片")').length > 0;
- 
+
             // 页面元素定位
-            let regions_anchor = $('#info span.pl:contains("制片国家/地区")');  //产地
-            let language_anchor = $('#info span.pl:contains("语言")');  //语言
-            let episodes_anchor = $('#info span.pl:contains("集数")');  //集数
-            let duration_anchor = $('#info span.pl:contains("单集片长")');  //片长
- 
+            let regions_anchor = $('#info span.pl:contains("制片国家/地区")'); //产地
+            let language_anchor = $('#info span.pl:contains("语言")'); //语言
+            let episodes_anchor = $('#info span.pl:contains("集数")'); //集数
+            let duration_anchor = $('#info span.pl:contains("单集片长")'); //片长
+
+            let imdb_anchor = $('#info span.pl:contains("IMDb")'); // IMDb
+            let has_imdb = imdb_anchor.length > 0;
+
             // 基础Movieinfo信息
             let chinese_title = document.title.replace('(豆瓣)', '').trim();
             let foreign_title = $('#content h1>span[property="v:itemreviewed"]').text().replace(chinese_title, '').trim();
             let poster = rawUrl ? rawUrl.replace('raw','l_ratio_poster').replace('img3','img1') : '';
- 
+
             if (has_aka) {
-                aka = fetch_anchor(aka_anchor).split(' / ').sort(function (a, b) {  //首字(母)排序
+                aka = fetch_anchor(aka_anchor).split(' / ').sort(function (a, b) { //首字(母)排序
                     return a.localeCompare(b);
                 }).join('/');
             }
- 
+
             if (foreign_title) {
                 trans_title = chinese_title + (aka ? ('/' + aka) : '');
                 this_title = foreign_title;
@@ -422,19 +671,19 @@ $(document).ready(function () {
                 trans_title = aka ? aka : '';
                 this_title = chinese_title;
             }
- 
-            playdate = $('#info span[property="v:initialReleaseDate"]').map(function () {   //上映日期
+
+            playdate = $('#info span[property="v:initialReleaseDate"]').map(function () {  //上映日期
                 return $(this).text().trim();
             }).toArray().sort(function (a, b) {//按上映日期升序排列
                 return new Date(a) - new Date(b);
             }).join('/');
- 
+
             year = ' ' + $('#content > h1 > span.year').text().substr(1, 4);
             region = regions_anchor[0] ? fetch_anchor(regions_anchor).split(' / ').join('/') : '';
             language = language_anchor[0] ? fetch_anchor(language_anchor).split(' / ').join('/') : '';
             episodes = episodes_anchor[0] ? fetch_anchor(episodes_anchor) : '';
             duration = duration_anchor[0] ? fetch_anchor(duration_anchor) : $('#info span[property="v:runtime"]').text().trim();
- 
+
             let is_europe = region.match(/美国|英国|加拿大|丹麦/);
             let is_japan = region.match(/日本/);
             let is_korea = region.match(/韩国/);
@@ -444,11 +693,49 @@ $(document).ready(function () {
             let is_mainland = region.match(/中国大陆/);
             let is_mandarine = language.match(/汉语普通话/);
             let is_otherlan = language.match(/\//);
- 
-            genre = $('#info span[property="v:genre"]').map(function () {  //类别
+
+            genre = $('#info span[property="v:genre"]').map(function () { //类别
                 return $(this).text().trim();
             }).toArray().join('/');
- 
+
+            // 获取电影名
+            let title = $('#content > h1 > span')[0].textContent.split(' ').shift().replace(/[，]/g, " ").replace(/：.*$/, "");
+            let eng_title = [this_title, trans_title].join("/").split("/").filter(function (arr) {
+                return /([a-zA-Z]){2,}/.test(arr);
+            })[0] || "";
+            let is_chinese = title.match(/[^\x00-\xff]/);
+            let unititle = is_chinese ? title : eng_title;
+
+            // 剧集修正季数名
+            eng_title = eng_title.match(/Season\s\d\d/) ? eng_title.replace(/Season\s/, "S") : eng_title.replace(/Season\s/, "S0");
+            eng_title = eng_title.replace(/[:,!\-]/g, "").replace(/ [^a-z0-9]+$/, "").replace(/ +/g," ");
+            let eng_title_clean = eng_title.replace(/ S\d\d*$/, "");
+            let has_entitle= eng_title_clean;
+
+            // 日剧春夏秋冬解析
+            let playdate_pro = new Date(playdate.split('/')[0]);
+            let release_year = playdate.replace(/-.*$/, "").replace(/^\d{2}/, "");
+            let release_month = playdate_pro.getMonth() + 1;
+            let drama_season;
+            if ([4, 5, 6].includes(release_month)) { drama_season = "spring"; }
+            else if ([7, 8, 9].includes(release_month)) { drama_season = "summer"; }
+            else if ([10, 11, 12].includes(release_month)) { drama_season = "autumn"; }
+            else { drama_season = "winter"; }
+
+            // 电影+年份 (只有电影才搜索并赋值年份)
+            let encode_year = is_movie ? year.replace(/ /, "_") : "";
+            let nian = is_movie ? year : "";
+            let encode_this_title = (this_title || "").replace(/:/, "").replace(/ /g, "_");
+            let ptzimu = encode_this_title + encode_year;
+            chinese_title = chinese_title.replace(/[：，]/, " ");
+            let gunititle = _encodeToGb2312(unititle, true);
+            let punititle = encodeURI(unititle).replace(/%/g, "%25");
+            let uunititle = encodeURI(unititle).replace(/%/g, "_");
+            let ywm = eng_title + nian;
+            let zwm = chinese_title + nian;
+            let entitle = eng_title_clean + nian
+            let is_ywm = ywm.match(/[A-Z]/);
+
             // Add top rank tag
             if (GM_getValue("enable_top_rang_tag", true)) {
                 GM_xmlhttpRequest({
@@ -487,7 +774,7 @@ $(document).ready(function () {
                     }
                 });
             }
-            
+
             // 从中栏中先获取豆瓣评分信息（此时还没有imdb等第三方评价信息）
             let douban_vote_another = $('div[typeof="v:Rating"]:eq(0)');
             if (douban_vote_another.length > 0) {
@@ -495,111 +782,173 @@ $(document).ready(function () {
                 douban_votes = douban_vote_another.find('[property="v:votes"]').length > 0 ? douban_vote_another.find('[property="v:votes"]').text() : 0;
                 douban_rating = douban_average_rating + '/10 from ' + douban_votes + ' users';
             }
- 
+
             // 中栏加强
             $("div#interest_sectl").append(`<div class='rating_wrap clearbox' id='loading_more_rate'>加载第三方评价信息中.......</div>
-<div class="rating_wrap clearbox rating_imdb" rel="v:rating" style="display:none"></div>
+<div class="rating_wrap clearbox rating_imdb" style="display:none"></div>
 <div class="rating_wrap clearbox rating_rott" style="display:none"></div>
-<div class="rating_wrap clearbox rating_anidb" rel="v:rating" style="border-top: 1px solid #eaeaea; display:none"></div>
+<div class="rating_wrap clearbox rating_anidb" style="border-top: 1px solid #eaeaea; display:none"></div>
 <div class="rating_more" style="display:none"></div>`); // 修复部分情况$("div.rating_betterthan")不存在情况
- 
+
+            // put on more ratings
+            let rating_more_data = [ /** {name, link || `${imdb_link}`, text} */ ];
+
+            function update_rating_more(data) {
+                rating_more_data.push(data);
+
+                let rating_more = $('#interest_sectl .rating_more');
+                let rating_more_html = '';
+                for (let i = 0; i < rating_more_data.length; i++) {
+                    let rating_data = rating_more_data[i];
+                    rating_more_html +=`<div>${rating_data['name']} <a href='${rating_data['link'] || imdb_link}' style="${ rating_data['name'].length <= 4 ? 'margin-left:-20px' : ''} " target="_blank" title="${rating_data['data']}">${rating_data['data']}</a></div>`;
+                }
+                rating_more.html(rating_more_html);
+                rating_more.show();
+                $("#loading_more_rate").hide();
+            }
+
             // 请求IMDb信息（最慢，最先且单独请求）
             if (has_imdb) {
-                let imdb_link_anchor = $('#info span.pl:contains("IMDb链接")');
-                imdb_link = imdb_link_anchor.next().attr('href').replace(/(\/)?$/, '/').replace("http://", "https://");
-                imdb_id = imdb_link.match(/tt\d+/)[0];
- 
+                imdb_id = fetch_anchor(imdb_anchor);
+                imdb_link = `https://www.imdb.com/title/${imdb_id}/`
+
+                // 把豆瓣删除的超链接给加回去
+                $(imdb_anchor[0].nextSibling).replaceWith(`&nbsp;<a href="${imdb_link}" target="_blank">${imdb_id}</a>`);
+
                 getDoc(imdb_link, null, function (doc) {
-                    // 评分，Metascore，烂番茄
-                    imdb_average_rating = $('div.ratingValue strong span', doc).text();
-                    imdb_votes = $('div.imdbRating a span', doc).text();
-                    imdb_rating = imdb_votes ? imdb_average_rating + '/10 from ' + imdb_votes + ' users' : '';  // MovieinfoGen 相关
- 
-                    $('#interest_sectl div.rating_imdb').html(starBlock("IMDB", imdb_link + 'ratings?ref_=tt_ov_rt', imdb_average_rating, imdb_votes)).show();
- 
-                    // put on more ratings
-                    let rating_more = $('#interest_sectl .rating_more');
-                    let titleReviewBarItem = $('.titleReviewBar div.titleReviewBarItem', doc);
-                    for (let i = 0; i < titleReviewBarItem.length; i++) {
-                        let item = titleReviewBarItem[i];
-                        let text = $(item).text();
-                        if (text.indexOf('Metascore') !== -1) {
-                            if (GM_getValue("enable_imdb_ext_info", true)) {
-                                if ($("div.txt-block:contains('Motion Picture Rating')", doc).text().length > 0) {
-                                    let mpaa = $("div.txt-block:contains('Motion Picture Rating')", doc).text().trim().replace(/\n/g, '').replace(/^.*Rated /, '').replace(/ .*$/, '').replace(/^G$/, '大众级 | 全年龄').replace(/^PG$/, '指导级 | ≥6岁').replace(/^PG-13$/, '特指级 | ≥13岁').replace(/^NC-17$/, '限定级 | ≥17岁').replace(/^R$/, '限制级 | ≥18岁');
-                                    rating_more.append(`<div>分级<a href='${imdb_link + 'parentalguide?ref_=tt_stry_pg#certification'}' style="margin-left:-35px" target="_blank">${mpaa}</a></div>`);
+                    // 判断是不是新版界面
+                    let new_another = $('script#__NEXT_DATA__', doc);
+                    let is_new = new_another.length > 0;
+                    let ld_json_imdb;
+
+                    try {
+                        // IMDb 评分 （评分信息直接从 ld_json 中获取算了）
+                        ld_json_imdb = parseLdJson($('head > script[type="application/ld+json"]', doc).text());
+                        imdb_average_rating = ld_json_imdb["aggregateRating"]["ratingValue"];
+                        imdb_votes = ld_json_imdb["aggregateRating"]["ratingCount"];
+                        imdb_rating = imdb_votes ? imdb_average_rating + '/10 from ' + imdb_votes + ' users' : ''; // MovieinfoGen 相关
+                        $('#interest_sectl div.rating_imdb').html(starBlock("IMDB", imdb_link + 'ratings?ref_=tt_ov_rt', imdb_average_rating, imdb_votes)).show();
+
+                        // 分级信息 可以从 ld_json 中获取
+                        if (ld_json_imdb['contentRating']) {
+                            const contentRatingMap = {
+                                'G': '大众级 | 全年龄',
+                                'PG': '指导级 | ≥6岁',
+                                'PG-13': '特指级 | ≥13岁',
+                                'NC-17': '限定级 | ≥17岁',
+                                'R': '限制级 | ≥18岁'
+                            };
+                            update_rating_more({
+                                name: '分级', // MPAA
+                                link: imdb_link + 'parentalguide#certification',
+                                data: contentRatingMap[ld_json_imdb['contentRating']] || ld_json_imdb['contentRating']
+                            });
+                        }
+
+                        // Metascore
+                        let metascore_selector = is_new ? 'a[href*="criticreviews"] span.score' : 'a[href^=criticreviews] span';
+                        if ($(metascore_selector, doc).length > 0) {
+                            update_rating_more({
+                                name: 'Metascore',
+                                link: imdb_link + 'criticreviews?ref_=tt_ov_rt',
+                                data: $(metascore_selector, doc).text()
+                            });
+                        }
+
+                        // 流行度
+                        let popularity_selector = is_new
+                        ? 'div[class^="TitleBlockButtonBase__ButtonContentWrap"]:has( > div[class^="TrendingButton__ContentWrap"])'
+                        : 'div:contains("Popularity") + div > span.subText';
+                        if ($(popularity_selector, doc).length > 0) {
+                            let popularity_another = $(popularity_selector, doc);
+                            let pop_score, pop_delta, pop_up;
+                            if (is_new) {
+                                pop_score = popularity_another.find('div[class^="TrendingButton__TrendingScore"]').text();
+                                pop_delta = popularity_another.find('div[class^="TrendingButton__TrendingDelta"]').text();
+                                pop_up = popularity_another.find('svg.ipc-icon--arrow-drop-up').length > 0;
+                            } else {
+                                let pop_text_match = popularity_another.text().match(/(\d+)\n.+?(\d+)/i);
+                                if (pop_text_match && pop_text_match.length >= 3) {
+                                    pop_score = pop_text_match[1];
+                                    pop_delta = pop_text_match[2];
+                                    pop_up = popularity_another.find('span.popularityImageUp').length > 0;
                                 }
-                                if ($("div.txt-block:contains('Budget:')", doc).text().length > 0) {
-                                    let budget = $("div.txt-block:contains('Budget:')", doc).text().trim().replace(/\n/g, '').replace(/ .*$/, '').replace(/^Budget:/, '').replace(/CNY./, '¥').replace(/KRW./, '₩').replace(/JPY./, '円').replace(/HKD./, '港');
-                                    rating_more.append(`<div>总成本<a href='${imdb_link + '?rf=cons_tt_bo_tt&ref_=cons_tt_bo_tt'}' style="margin-left:-35px" target="_blank">${budget}</a></div>`);
+                            }
+
+                            if (pop_score) {
+                                update_rating_more({
+                                    name: '流行度',
+                                    link: imdb_link + 'criticreviews?ref_=tt_ov_rt',
+                                    data: `${pop_score} (${pop_up ? '∧' : '∨'}${pop_delta})`
+                                });
+                            }
+                        }
+
+                        // TODO let reviews;
+
+                        // 从网页中获取的部分信息，要区分是否新版页面
+                        if (GM_getValue("enable_imdb_ext_info", true)) {
+                            if (is_new) {
+                                // TODO 新版代码下的 imdb 增强信息（下一版更新）
+                            } else { // 旧版代码
+                                if ($("div.txt-block:contains('Budget:')", doc).length > 0) {
+                                    update_rating_more({
+                                        name: '总成本',
+                                        data: $("div.txt-block:contains('Budget:')", doc).text().trim().replace(/\n/g, '').replace(/ .*$/, '').replace(/^Budget:/, '').replace(/CNY./, '¥').replace(/KRW./, '₩').replace(/JPY./, '円').replace(/HKD./, '港')
+                                    });
                                 }
                                 if ($("div.txt-block:contains('Opening Weekend:'):not(:contains('USA:'))", doc).text().length > 0) {
-                                    let opening = $("div.txt-block:contains('Opening Weekend:'):not(:contains('USA:'))", doc).text().trim().replace(/\n/g, '').replace(/^Opening Weekend:/, '').replace(/ \(.*$/, '').replace(/CNY./, '¥').replace(/KRW./, '₩').replace(/JPY./, '円').replace(/HKD./, '港');
-                                    rating_more.append(`<div>本首周<a href='${imdb_link + '?rf=cons_tt_bo_tt&ref_=cons_tt_bo_tt'}' style="margin-left:-35px" target="_blank">${opening}</a></div>`);
+                                    update_rating_more({
+                                        name: '本首周',
+                                        data: $("div.txt-block:contains('Opening Weekend:'):not(:contains('USA:'))", doc).text().trim().replace(/\n/g, '').replace(/^Opening Weekend:/, '').replace(/ \(.*$/, '').replace(/CNY./, '¥').replace(/KRW./, '₩').replace(/JPY./, '円').replace(/HKD./, '港')
+                                    });
                                 }
                                 if ($("div.txt-block:contains('Opening Weekend USA:')", doc).text().length > 0) {
-                                    let openingusa = $("div.txt-block:contains('Opening Weekend USA:')", doc).text().trim().replace(/\n/g, '').replace(/^Opening Weekend USA:/, '').replace(/,\d+ .*$/, '');
-                                    rating_more.append(`<div>美首周<a href='${imdb_link + '?rf=cons_tt_bo_tt&ref_=cons_tt_bo_tt'}' style="margin-left:-35px" target="_blank">${openingusa}</a></div>`);
+                                    update_rating_more({
+                                        name: '美首周',
+                                        data: $("div.txt-block:contains('Opening Weekend USA:')", doc).text().trim().replace(/\n/g, '').replace(/^Opening Weekend USA:/, '').replace(/,\d+ .*$/, '')
+                                    });
                                 }
                                 if ($("div.txt-block:contains('Gross USA:')", doc).text().length > 0) {
-                                    let gross = $("div.txt-block:contains('Gross USA:')", doc).text().trim().replace(/\n/g, '').replace(/^Gross USA:/, '').replace(/\, \d+ .*$/, '');
-                                    rating_more.append(`<div>美票房<a href='${imdb_link + '?rf=cons_tt_bo_tt&ref_=cons_tt_bo_tt'}' style="margin-left:-35px" target="_blank">${gross}</a></div>`);
+                                    update_rating_more({
+                                        name: '美票房',
+                                        data: $("div.txt-block:contains('Gross USA:')", doc).text().trim().replace(/\n/g, '').replace(/^Gross USA:/, '').replace(/\, \d+ .*$/, '')
+                                    });
                                 }
                                 if ($("div.txt-block:contains('Cumulative Worldwide Gross:')", doc).text().length > 0) {
-                                    let cumulative = $("div.txt-block:contains('Cumulative Worldwide Gross:')", doc).text().trim().replace(/\n/g, '').replace(/^Cumulative Worldwide Gross:/, '').replace(/\, \d+ .*$/, '');
-                                    rating_more.append(`<div>总票房<a href='${imdb_link + '?rf=cons_tt_bo_tt&ref_=cons_tt_bo_tt'}' style="margin-left:-35px" target="_blank">${cumulative}</a></div>`);
+                                    update_rating_more({
+                                        name: '总票房',
+                                        data: $("div.txt-block:contains('Cumulative Worldwide Gross:')", doc).text().trim().replace(/\n/g, '').replace(/^Cumulative Worldwide Gross:/, '').replace(/\, \d+ .*$/, '')
+                                    });
                                 }
                                 if ($("div.txt-block:contains('Aspect Ratio:')", doc).text().length > 0) {
-                                    let aspect = $("div.txt-block:contains('Aspect Ratio:')", doc).text().trim().replace(/\n/g, '').replace(/^Aspect Ratio:/, '');
-                                    rating_more.append(`<div>宽高比<a href='${imdb_link + 'technical?ref_=tt_dt_spec'}' style="margin-left:-35px" target="_blank">${aspect}</a></div>`);
+                                    update_rating_more({
+                                        name: '宽高比',
+                                        link: imdb_link + 'technical?ref_=tt_dt_spec',
+                                        data: $("div.txt-block:contains('Aspect Ratio:')", doc).text().trim().replace(/\n/g, '').replace(/^Aspect Ratio:/, '')
+                                    });
                                 }
                             }
-                            let metascore = $(item).find('a[href^=criticreviews] span').text();
-                            rating_more.append(`<div>Metascore<a href='${imdb_link + 'criticreviews?ref_=tt_ov_rt'}' target="_blank">${metascore}</a></div>`);
-                        } else if (text.indexOf('Popularity') !== -1) {
-                            if ($("div.txt-block:contains('Certificate:')", doc).text().length > 0) {
-                                let tvpg = $("div.txt-block:contains('Certificate:')", doc).text().trim().replace(/\n/g, '').replace(/^Certificate:/, '').replace(/ \|.*$/, '').replace(/^( )+TV-Y( )+$/, '推荐级 | 全年龄').replace(/^( )+TV-G( )+$/, '大众级 | 全年龄').replace(/^( )+TV-Y7( )+$/, '指导级 | ≥7岁').replace(/^( )+TV-PG( )+$/, '特指级 | ≥8岁').replace(/^( )+R-12( )+$/, '监督级 | ≥12岁').replace(/^( )+TV-14( )+$/, '限定级 | ≥14岁').replace(/^( )+TV-MA( )+$/, '限制级 | ≥17岁').replace(/Not Rated/, '未分级').replace(/See all certifications/, '点击查看');
-                                rating_more.append(`<div>分级<a href='${imdb_link + 'parentalguide?ref_=tt_stry_pg#certification'}' style="margin-left:-35px" target="_blank">${tvpg}</a></div>`);
-                            }
-                            let popularity = $(item).find('span.subText').html();
-                            popularity = `<div>流行度&nbsp;&nbsp;${popularity}<br><div>`;
-                            rating_more.append(popularity);
-                        } else if (text.indexOf('Reviews') !== -1) {
-                            // TODO let reviews;
                         }
-                    }
- 
-                    if (GM_getValue("enable_blue_date", true)) { //蓝光发售日期显示功能
-                        let title = $('#content > h1 > span')[0].textContent.split(' ').shift().replace(/[，]/g, " ").replace(/：.*$/, "");
-                        let eng_title = [this_title, trans_title].join("/").split("/").filter(function (arr) {
-                            return /([a-zA-Z]){2,}/.test(arr);
-                        })[0] || "";
-                        let ywm = eng_title.replace(/[:,!\-]/g, "").replace(/ /g,'-');
-                        let blueURL = 'https://www.releases.com/p/' + ywm.toLowerCase() + '/blu-ray/';
-                        getDoc(blueURL, null, function (bluedoc) {
-                            let result_0 = $("div.right-col.col-md-5 span.full-date", bluedoc);
-                            if (result_0.length > 0) {
-                                let blueDate = result_0.text().replace(/January (\d+), \d\d(\d\d)/g, '$2年1月$1日').replace(/February (\d+), \d\d(\d\d)/g, '$2年2月$1日').replace(/March (\d+), \d\d(\d\d)/g, '$2年3月$1日').replace(/April (\d+), \d\d(\d\d)/g, '$2年4月$1日').replace(/May (\d+), \d\d(\d\d)/g, '$2年5月$1日').replace(/June (\d+), \d\d(\d\d)/g, '$2年6月$1日').replace(/July (\d+), \d\d(\d\d)/g, '$2年7月$1日').replace(/August (\d+), \d\d(\d\d)/g, '$2年8月$1日').replace(/September (\d+), \d\d(\d\d)/g, '$2年9月$1日').replace(/October (\d+), \d\d(\d\d)/g, '$2年10月$1日').replace(/November (\d+), \d\d(\d\d)/g, '$2年11月$1日').replace(/December (\d+), \d\d(\d\d)/g, '$2年12月$1日');
-                                rating_more.append(`<div>蓝光日期<a href='${blueURL}' style="margin-left:-23px" target="_blank">${blueDate}</a></div>`);
-                            }
-                        });
-                    }
- 
-                    if (rating_more.html()) {
-                        rating_more.show();
-                    }
+                    } catch (e) {
+                        // throw e;
+                    };
+
                     if (GM_getValue("enable_tomato_rate", true)) { //烂番茄评分显示功能
                         // add rottentomatoes block
-                        $('#titleYear', doc).remove();
-                        let movieTitle = $.trim($('div.title_wrapper h1', doc).text());
+                        let movieTitle = ld_json_imdb['name'].trim();
                         let rottURL = 'https://www.rottentomatoes.com/m/' + movieTitle.replace(/:|-/, "").replace(/\s+/g, "_").replace(/\W+/g, "").replace(/_+/g, "_").toLowerCase();
                         getDoc(rottURL, null, function (rotdoc) {
                             $('#interest_sectl div.rating_rott').html(`<span class="rating_logo ll">烂番茄评分</span><br><div id="rottValue" class="rating_self clearfix"></div></div>`).show();
-                            if ($('#tomato_meter_link', rotdoc).length > 0) {
-                                let rating_rott_value = $('#tomato_meter_link .mop-ratings-wrap__percentage', rotdoc).html();
-                                let rating_audience_value = $('.audience-score .mop-ratings-wrap__percentage', rotdoc).html();
-                                $('#scoreStats .subtle.superPageFontColor', rotdoc).remove();
-                                $('#interest_sectl .rating_rott #rottValue').append(`<strong class="ll rating_num"><a target="_blank" href="${rottURL}">${rating_rott_value}</a>&nbsp;<div class="ll rating_num"><a target="_blank" href="${rottURL}">${rating_audience_value}</a></strong>`);
+                            if ($('script#score-details-json', rotdoc).length > 0) {
+                                let rottJson = JSON.parse($('#score-details-json', rotdoc).text());
+                                if (rottJson.modal && rottJson.modal.tomatometerScoreAll) {
+                                    let tomatometerScoreAll = rottJson.modal.tomatometerScoreAll || {};
+                                    let rating_rott_value = tomatometerScoreAll.score || 0;
+                                    let fresh_rott_value = tomatometerScoreAll.likedCount || 0;
+                                    let rotten_rott_value = tomatometerScoreAll.notLikedCount || 0;
+                                    $('#interest_sectl .rating_rott #rottValue').append(`<strong class="ll rating_num"><a target="_blank" href="${rottURL}">${rating_rott_value}%</a></strong><div class="rating_right" style="line-height: 16px;"><span>鲜:&nbsp;&nbsp;${fresh_rott_value}</span><br><span>烂:&nbsp;&nbsp;${rotten_rott_value}</span></div>`);
+                                }
                             }
                             else {
                                 $('#interest_sectl div.rating_rott').append(`<br>搜索rotta: <a target='_blank' href='${'https://www.rottentomatoes.com/search/?search=' + encodeURI(movieTitle)}'>${movieTitle}</a>`);
@@ -609,6 +958,23 @@ $(document).ready(function () {
                     $("#loading_more_rate").hide();
                 });
             }
+
+            if (GM_getValue("enable_blue_date", true)) { //蓝光发售日期显示功能
+                let ywm = eng_title.replace(/[:,!\-]/g, "").replace(/ /g,'-');
+                let blueURL = 'https://www.releases.com/p/' + ywm.toLowerCase() + '/blu-ray/';
+                getDoc(blueURL, null, function (bluedoc) {
+                    let result_0 = $('span[title*="Blu-ray"][title*="release date"]:not(:contains("TBA")):first', bluedoc);
+                    if (result_0.length > 0) {
+                        let blueDate = new Date(result_0.text());
+                        update_rating_more({  // 这种写法可能会导致 蓝光发售日期显示顺序飘忽不定，不过没有太大关系
+                            name: '蓝光发售',
+                            link: blueURL,
+                            data: `${blueDate.getFullYear()}年${blueDate.getMonth()+1}月${blueDate.getDate()}日`
+                        });
+                    }
+                });
+            }
+
             if (GM_getValue("enable_anime_rate", true)) { //开启动漫评分显示功能
                 // 如果是动漫，请求anydb的anidb、bgm、mal信息
                 if (is_anime) {
@@ -634,14 +1000,14 @@ $(document).ready(function () {
                     });
                 }
             }
- 
-            if (GM_getValue("enable_mediainfo_gen", false)) {  // 请求豆瓣附属信息用于Mediainfo生成
+
+            if (GM_getValue("enable_mediainfo_gen", false)) { // 请求豆瓣附属信息用于Mediainfo生成
                 GM_xmlhttpRequest({
                     method: 'GET',
                     url: douban_link + 'awards/',
                     headers: {
                         'Host' : 'movie.douban.com',
-                       // 'Referer' : location.href,
+                        // 'Referer' : location.href,
                     },
                     onload: function (responseDetail) {
                         if (responseDetail.status === 200) {
@@ -658,13 +1024,13 @@ $(document).ready(function () {
                         }
                     }
                 }); // 该影片的评奖信息
- 
+
                 // 简介 （首先检查是不是有隐藏的，如果有，则直接使用隐藏span的内容作为简介，不然则用 span[property="v:summary"] 的内容）
-                introduction =  $('#link-report > span.all.hidden').length > 0 ? $('#link-report > span.all.hidden').text() : // 隐藏部分
+                introduction = $('#link-report > span.all.hidden').length > 0 ? $('#link-report > span.all.hidden').text() : // 隐藏部分
                 ($('[property="v:summary"]').length > 0 ? $('[property="v:summary"]').text() : '暂无相关剧情介绍');
-                introduction = introduction.split('\n').map(function(a) {return a.trim()}).join('\n');  // 处理简介缩进
+                introduction = introduction.split('\n').map(function(a) {return a.trim()}).join('\n'); // 处理简介缩进
                 // 导演，编剧，演员 （只能获取到显示的，没API丰富）
-                let director_another = $('span > span:contains("导演")').parent('span');  // 往上回溯一级
+                let director_another = $('span > span:contains("导演")').parent('span'); // 往上回溯一级
                 let writer_another = $('span > span:contains("编剧")').parent('span');
                 let cast_another = $('span.actor');
                 if (ld_json) {  // 优先使用ld_json中内容，没有则做页面解析
@@ -675,66 +1041,29 @@ $(document).ready(function () {
                 if (typeof director == 'undefined' && director_another.length > 0) director = director_another.find('a[href^="/celebrity"]').map(function() {return $(this).text()}).get().join(' / ');
                 if (typeof writer == 'undefined' && writer_another.length > 0) writer = writer_another.find('a[href^="/celebrity"]').map(function() {return $(this).text()}).get().join(' / ');
                 if (typeof cast == 'undefined' && cast_another.length > 0) cast = cast_another.find('a[href^="/celebrity"]').map(function() {return $(this).text()}).get().join('\n');
- 
+
                 // 标签
                 let tag_another = $('div.tags-body > a[href^="/tag"]');
                 if (tag_another.length > 0) tags = tag_another.map(function () {return $(this).text()}).get().join(' | ');
             }
- 
-            // 获取电影名
-            let title = $('#content > h1 > span')[0].textContent.split(' ').shift().replace(/[，]/g, " ").replace(/：.*$/, "");
-            let eng_title = [this_title, trans_title].join("/").split("/").filter(function (arr) {
-                return /([a-zA-Z]){2,}/.test(arr);
-            })[0] || "";
-            let is_chinese = title.match(/[^\x00-\xff]/);
-            let unititle = is_chinese ? title : eng_title;
- 
-            // 剧集修正季数名
-            eng_title = eng_title.match(/Season\s\d\d/) ? eng_title.replace(/Season\s/, "S") : eng_title.replace(/Season\s/, "S0");
-            eng_title = eng_title.replace(/[:,!\-]/g, "").replace(/ [^a-z0-9]+$/, "").replace(/ +/g," ");
-            let eng_title_clean = eng_title.replace(/ S\d\d*$/, "");
-            let has_entitle= eng_title_clean;
- 
-            // 日剧春夏秋冬解析
-            let playdate_pro = new Date(playdate.split('/')[0]);
-            let release_year = playdate.replace(/-.*$/, "").replace(/^\d{2}/, "");
-            let release_month = playdate_pro.getMonth() + 1;
-            let drama_season;
-            if ([4, 5, 6].includes(release_month)) { drama_season = "spring"; }
-            else if ([7, 8, 9].includes(release_month)) { drama_season = "summer"; }
-            else if ([10, 11, 12].includes(release_month)) { drama_season = "autumn"; }
-            else { drama_season = "winter"; }
- 
-            // 电影+年份 (只有电影才搜索并赋值年份)
-            let encode_year = is_movie ? year.replace(/ /, "_") : "";
-            let nian = is_movie ? year : "";
-            let encode_this_title = (this_title || "").replace(/:/, "").replace(/ /g, "_");
-            let ptzimu = encode_this_title + encode_year;
-            chinese_title = chinese_title.replace(/[：，]/, " ");
-            let gunititle = _encodeToGb2312(unititle, true);
-            let punititle = encodeURI(unititle).replace(/%/g, "%25");
-            let uunititle = encodeURI(unititle).replace(/%/g, "_");
-            let ywm = eng_title + nian;
-            let zwm = chinese_title + nian;
-            let entitle = eng_title_clean + nian
-            let is_ywm = ywm.match(/[A-Z]/);
+
+            // 资源名称
+            let zwzy = (unititle.replace(/ /g, ".").replace("：", ".").replace(/\.\./g, ".") + "." + eng_title.replace(": ", ".").replace(/ /g, ".") + "." + year.replace(/ /, "")).replace(/\.{2,}/g, ".");
+            let imdbzy = has_imdb ? "." + imdb_id : "";
+            $("div#info").append(`<br><span class=\"pl\">资源名称: </span>${zwzy}${imdbzy}`);
+
+            let neizhan = has_imdb ? imdb_id : ('/subject/' + douban_id); // PT内站 智能判定是用IMDB ID还是豆瓣ID
             let gongwang = has_imdb ? imdb_id : douban_id;
             let jingzhun = has_imdb ? imdb_id : ywm;
             let dbzw = has_imdb ? imdb_id : unititle + nian;
             let unit3d = has_imdb ? "imdb=" + imdb_id.slice(2) : "search=" + ywm;
             let movieright = is_movie ? "movies" : "tv-shows";
             let avistaz = has_imdb ? "imdb=" + imdb_id : "search=" + ywm;
- 
-            // 资源名称
-            let zwzy = (unititle.replace(/ /g, ".").replace("：", ".").replace(/\.\./g, ".") + "." + eng_title.replace(": ", ".").replace(/ /g, ".") + "." + year.replace(/ /, "")).replace(/\.{2,}/g, ".");
-            let imdbzy = has_imdb ? "." + imdb_id : "";
-            $("div#info").append(`<span class=\"pl\">资源名称: </span>${zwzy}${imdbzy}`);
- 
-            let neizhan = has_imdb ? imdb_id : ('/subject/' + douban_id);  // PT内站 智能判定是用IMDB ID还是豆瓣ID
+
             if (_version === "完整版") {
-                let npid = has_imdb ? ('imdb=' + imdb_id) : ('douban=' + douban_id);  // NPUBITS 智能判定是用IMDB ID还是豆瓣ID
+                let npid = has_imdb ? ('imdb=' + imdb_id) : ('douban=' + douban_id); // NPUBITS 智能判定是用IMDB ID还是豆瓣ID
                 let ttgid = has_imdb ? ('IMDB' + imdb_id.slice(2)) : zwm; // TTG 智能判定是用IMDB ID还是中文名
-                let zxid = has_imdb ? imdb_id : zwm;  // ZX 智能判定是用IMDB ID还是中文名
+                let zxid = has_imdb ? imdb_id : zwm; // ZX 智能判定是用IMDB ID还是中文名
                 let spid = has_imdb ? (imdb_id + '&search_area=4') : (unititle + '&search_area=0'); // Spring 智能判定是用IMDB ID还是中文名
                 site_map.push({
                     name: "10万+种PT内站",
@@ -790,7 +1119,7 @@ $(document).ready(function () {
                     name: "5千+种PT内站",
                     label: [
                         { name: "JoyHD", link: 'https://www.joyhd.net/torrents.php?incldead=1&search_area=1&notnewword=1&search=' + neizhan, selector: "tr table.torrentname"},
-                        { name: "海胆之家", link: 'https://www.haidan.video/torrents.php?incldead=1&search_area=1&notnewword=1&search=' + neizhan, selector: "div.name_col.table_cell" },                        
+                        { name: "海胆之家", link: 'https://www.haidan.video/torrents.php?incldead=1&search_area=1&notnewword=1&search=' + neizhan, selector: "div.name_col.table_cell" },
                     ]
                 });
                 site_map.push({
@@ -857,7 +1186,7 @@ $(document).ready(function () {
                             { name: "Oznzb", link: 'https://www.oznzb.com/search/' + ywm, selector: "#browsetable > tbody > tr.ratingReportContainer:gt(0)", selector_need_login: "#login" },
                             { name: "SNZB", link: 'https://simplynzbs.com/search/' + ywm, selector: "#browsetable > tbody > tr:gt(0)", selector_need_login: "form[action='login']" },
                         ]
-                    }); 
+                    });
                     site_map.push({
                         name: "NZB年费影视",
                         label: [
@@ -868,7 +1197,7 @@ $(document).ready(function () {
                             { name: "NzbNoob", link: 'https://nzbnoob.com/search/' + ywm, selector: "#browsetable a.title", selector_need_login: "#modalLogin" },
                             { name: "NZBSU", link: 'https://nzb.su/search/' + ywm, selector: "#browsetable a.title", selector_need_login: "#modalLogin" },
                         ]
-                    }); 
+                    });
                     site_map.push({
                         name: "NZB免费影视",
                         label: [
@@ -881,7 +1210,7 @@ $(document).ready(function () {
                             { name: "NZBXS", link: 'https://www.nzbxs.com/?search%5Btree%5D=cat0_z0_a0&sortdir=ASC&sortby=&search%5Bvalue%5D%5B%5D=Title%3A%3D%3ADEF%3A' + eng_title_clean, selector: "#spots td.title" },
                             { name: "SpotNZB", link: 'https://spotnzb.xyz/?search%5Btree%5D=cat0_z0_a0&sortdir=ASC&sortby=&search%5Bvalue%5D%5B%5D=Title%3A%3D%3ADEF%3A' + eng_title_clean, selector: "#spots td.title" },
                         ]
-                    }); 
+                    });
                     site_map.push({
                         name: "PT影视外站",
                         label: [
@@ -940,12 +1269,14 @@ $(document).ready(function () {
                 site_map.push({
                     name: "终生会员论坛",
                     label: [
+                        { name: "89社区", link: 'https://www.4kxu.com/search.php?mod=forum&searchsubmit=yes&srchtxt=' + unititle, selector: "div.tl li.pbw" },
                         { name: "古哥论坛", link: 'http://www.gudage.cc/search.php?mod=forum&searchsubmit=yes&srchtxt=' + gunititle, selector: "div.tl li.pbw" },
                         { name: "抱书吧", link: 'http://www.baoshu8.com/searcher.php?type=thread&keyword=' + gunititle, selector: "div.dlA dl" },
                         { name: "国配影迷", link: 'https://club.coovm.com/search.php?mod=forum&searchsubmit=yes&srchtxt=' + gunititle, selector: "div.tl li.pbw" },
                         { name: "慢慢游影", link: 'https://www.manmanyou.net/search.php?mod=forum&searchsubmit=yes&srchtxt=' + unititle, selector: "div.tl li.pbw", selector_need_login: "#messagelogin" },
                         { name: "盘乐网影", link: 'https://www.panle.net/search.php?mod=forum&searchsubmit=yes&srchtxt=' + unititle, selector: "div.tl li.pbw" },
                         { name: "印度电影", link: 'http://www.indmi.com/search.php?mod=forum&searchsubmit=yes&srchtxt=' + unititle, selector: "div.tl li.pbw" },
+                        { name: "云中漫步", link: 'https://www.yunzmb.com/search.php?mod=forum&searchsubmit=yes&srchtxt=' + gunititle, selector: "div.tl li.pbw" },
                     ]
                 });
                 site_map.push({
@@ -989,7 +1320,7 @@ $(document).ready(function () {
                     });
                 }
             }
- 
+
             if (!(is_mandarine) || (is_mandarine && is_otherlan)) {
                 site_map.push({
                     name: "精准中文字幕",
@@ -1005,10 +1336,8 @@ $(document).ready(function () {
                     name: "中文影视字幕",
                     label: [
                         { name: '字幕天堂', method: "post", link: 'http://www.zmtiantang.com/e/search/', data: `keyboard=${unititle}&show=title&classid=1,3&tempid=1`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: 'table.data > tbody > tr:nth-child(2)' },
-                        { name: '字幕组', link: 'http://www.zmz2019.com/search?type=subtitle&keyword=' + unititle, selector: ".search-result li" },
                         { name: 'Sub HD', link: 'http://subhd.tv/search0/' + unititle, selector: "div.col-md-9 div.box" },
                         { name: '伪射手', link: 'http://assrt.net/sub/?searchword=' + unititle, selector: "#resultsdiv a.introtitle" },
-                        { name: '电波字幕', link: 'http://dbfansub.com/?s=' + unititle, selector: "div.panel-body article.panel.panel-default.archive" },
                         { name: '中文字幕网', link: 'http://www.zimuzimu.com/so_zimu.php?title=' + unititle, selector: "table.sublist a.othersub" },
                     ]
                 });
@@ -1020,7 +1349,6 @@ $(document).ready(function () {
                         { name: 'Addic7ed', link: 'http://www.addic7ed.com/srch.php?search=' + eng_title_clean + year, selector: "table.tabel tr" },
                         { name: 'iSubtitles', link: 'https://isubtitles.info/search?kwd=' + ywm, selector: "div.movie-list-info h3" },
                         { name: 'Podnapisi', link: 'https://www.podnapisi.net/zh/subtitles/search/?language=zh&language=en&keywords=' + eng_title_clean + '&' + year + '-' + year, selector: "table tr.subtitle-entry" },
-                        { name: 'SubBank', link: 'https://subtitlebank.net/subtitles/search/?SubtitleSearch%5Bstext%5D=' + eng_title_clean, selector: "#content span.movie_name" },
                         { name: 'Subscene', link: 'https://subscene.com/subtitles/title?q=' + eng_title_clean, selector: "div.search-result div.title", selector_need_login: "h1 span:contains('Checking your browser')" },
                         { name: 'TVsubtitles', link: 'http://www.tvsubtitles.net/search.php?q=' + eng_title_clean, selector: "div.left_articles li" },
                         { name: 'YIFY', link: 'http://www.yifysubtitles.com/search?q=' + eng_title_clean, selector: "div.col-sm-12 div.col-xs-12" },
@@ -1160,7 +1488,7 @@ $(document).ready(function () {
                     ]
                 });
             }
- 
+
             if (is_anime && eng_title.trim().length > 0) {
                 site_map.push({
                     name: "动漫国外网站",
@@ -1250,11 +1578,10 @@ $(document).ready(function () {
                     { name: '6V电影网', method: "post", link: 'http://www.6vhao.tv/e/search/index.php', data: `show=title%2Csmalltext&tempid=1&tbname=Article&keyboard=${gunititle}&Submit22=%E6%90%9C%E7%B4%A2`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "div.listBox li" },
                     { name: 'CK电影', link: 'http://www.ck180.net/search.html?q=' + unititle, selector: 'ul.serach-ul div.info' },
                     { name: 'LOL电影', link: 'http://www.993dy.com/index.php?m=vod-search&wd=' + unititle, selector: 'div.movielist a.play-img' },
-                    { name: 'MP4电影', link: 'http://www.domp4.com/search/' + unititle + '-1.html', selector: `h2 a:contains(${unititle})` },
-                    { name: 'OK资源网', link: 'http://www.okzyw.com/index.php?m=vod-search&wd=' + unititle, selector: 'div.xing_vb span.xing_vb4' },
+                    { name: 'MP4电影', link: 'http://www.domp4.cc/search/' + unititle + '-1.html', selector: `h2 a:contains(${unititle})` },
                     { name: 'PianHD', link: 'http://www.pianhd.com/search/-------------.html?wd=' + unititle, selector: '.detail h3.title' },
                     { name: '比特影视', link: 'https://www.bteye.com/search/' + unititle, selector: '#main div.item' },
-                    { name: '电影港', method: "post", link: 'http://so.dygang.com/e/search/index.php', data: `tempid=1&tbname=article&keyboard=${gunititle}&show=title%2Csmalltext&Submit=%CB%D1%CB%F7`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "table[width='100%'][border='0'][cellspacing='0'][cellpadding='0'] a.classlinkclass" },
+                    { name: '电影港', method: "post", link: 'http://so.dygang.cc/e/search/index.php', data: `tempid=1&tbname=article&keyboard=${gunititle}&show=title%2Csmalltext&Submit=%CB%D1%CB%F7`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "table[width='100%'][border='0'][cellspacing='0'][cellpadding='0'] a.classlinkclass" },
                     { name: '电影天堂', method: "post", link: 'https://www.dy2018.com/e/search/index.php', data: `show=title%2Csmalltext&tempid=1&keyboard=${gunititle}&Submit=%C1%A2%BC%B4%CB%D1%CB%F7`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: 'div.co_content8 table' },
                     { name: '钉子电影', method: "post", link: 'http://www.dingzi66.com/q#search_' + unititle, data: `keyword=${unititle}`, csrf: { name: "_csrf", update: "data" }, headers: { "Content-Type": "application/x-www-form-urlencoded" }, selector: `h4 > a:contains(${unititle})` },
                     { name: '嘎嘎影视', link: 'http://www.gagays.xyz/movie/search?req%5Bkw%5D=' + unititle, selector: '#movie-sub-cont-db div.large-movie-detail' },
@@ -1264,11 +1591,9 @@ $(document).ready(function () {
                     { name: "两个BT", link: 'https://www.bttwo.com/?s=' + unititle, selector: 'div.mi_cont h3.dytit' },
                     { name: '美剧鸟', link: 'http://www.meijuniao.com/search/?wd=' + unititle, selector: 'ul.serach-ul div.info' },
                     { name: '飘花资源网', link: 'https://www.piaohua.com/plus/search.php?kwtype=0&keyword=' + unititle, selector: 'div.container div.txt' },
-                    { name: '下片片', link: 'http://search.xiepp.com/search.aspx?q=' + unititle, selector: 'div.searchlist h4.media-heading' }, 
                     { name: '新6V电影', method: "post", link: 'https://www.66s.cc/e/search/index.php', data: `show=title&tempid=1&tbname=article&mid=1&dopost=search&submit=&keyboard=${unititle}`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: '#post_container div.entry_post' },
                     { name: '迅播影院', link: 'http://www.22tu.tv/vodsearch/-------------/?wd=' + unititle + '&submit=%E6%90%9C+%E7%B4%A2', selector: 'ul.mlist div.info' },
                     { name: '影海', link: 'http://www.yinghub.com/search/list.html?keyword=' + unititle, selector: 'div.row div.info' },
-                    { name: '影视看看', link: 'http://www.yskk7.com/index.php?m=vod-search&wd=' + unititle, selector: 'div.movielist li' },
                     { name: '悠悠MP4', link: 'https://www.uump4.net/search-' + uunititle + '.htm', selector: 'div.card-body2 div.dateline' },
                     { name: '宅腐资源站', link: 'http://www.zhaifu.tv/plus/search.php?kwtype=0&q=' + gunititle, selector: 'div.content a.focus' },
                     { name: '最新影视站', link: 'http://www.zxysz.com/?s=' + unititle, selector: '#content li.p-item' },
@@ -1278,7 +1603,7 @@ $(document).ready(function () {
                 name: "BT国内网站",
                 label: [
                     { name: 'BT部落', link: 'http://www.btbuluo.com/s/' + unititle + '.html', selector: `h2 a:contains(${unititle})` },
-                    { name: 'BT之家', link: 'https://www.btbtt.me/search-index-keyword-' + unititle + '.htm', selector: '#threadlist table' },
+                    { name: 'BT之家', link: 'https://www.btbtt10.com/search-index-keyword-' + unititle + '.htm', selector: '#threadlist table' },
                     // { name: 'MVCAT', link: 'http://www.mvcat.com/search/?type=Title,subTitle,Tags&word=' + unititle, selector: 'h3.title' },
                     { name: 'MAG磁力', link: 'http://mag234.com/index/index?c=&k=' + unititle, selector: 'div.link-list-wrapper ul.link-list' },
                     { name: 'Tkitty', link: 'https://cn.torrentkitty.me/search/' + unititle, selector: `tbody td.name:not(:contains(没有结果))` },
@@ -1321,12 +1646,12 @@ $(document).ready(function () {
             let ptitle = encodeURI(title).replace(/%/g, "%25");
             let isbn_anchor = $('#info span.pl:contains("ISBN")');
             let isbn = isbn_anchor[0] ? fetch_anchor(isbn_anchor) : '';
- 
+
             // 比较时无视英文名大小写
-            jQuery.expr[':'].Contains = function(a, i, m) {  
-            return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;  
+            jQuery.expr[':'].Contains = function(a, i, m) {
+                return jQuery(a).text().toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
             };
- 
+
             function isbn13to10(str) {
                 //ISBN 10位和13位码互相转换
                 var s;
@@ -1334,7 +1659,7 @@ $(document).ready(function () {
                 var checkDigit = 0;
                 var result = "";
                 s = str.substring(3,str.length);
-                for ( i = 10; i > 1; i-- ) {
+                for (let i = 10; i > 1; i-- ) {
                     c = s.charAt(10 - i);
                     checkDigit += (c - 0) * i;
                     result += c;
@@ -1343,16 +1668,16 @@ $(document).ready(function () {
                 result += checkDigit == 10 ? 'X' : (checkDigit + "");
                 return ( result );
             }
- 
+
             let isbn10 = isbn13to10 (isbn);
-            
+
             // 当前只对有isbn号的书籍开启中栏评分增强
             if (isbn) {
                 let rating_more_hit = false;
                 $("div#interest_sectl").append(`<div class='rating_wrap clearbox' id='loading_more_rate'>加载第三方评价信息中.......</div>
                 <div class="rating_wrap clearbox rating_amazon_cn" rel="v:rating" style="display:none"></div>
                 <div class="rating_wrap clearbox rating_goodreads" style="display:none"></div>`);
- 
+
                 if (GM_getValue("enable_book_amazon.cn_rate", true)) {
                     rating_more_hit = true;
                     // 通过ISBN信息在亚马逊中国上搜索
@@ -1362,13 +1687,13 @@ $(document).ready(function () {
                             let book_id_in_amazon = result_0.attr("data-asin");
                             let book_url = "https://www.amazon.cn/dp/" + book_id_in_amazon;
                             let vote_text = result_0.text().replace(/\n/g, " ");
- 
+
                             // 这是一个很取巧的获取方式，很可能因为页面结构更改而失效。 最近检查于 2019.09.25
                             let _group = vote_text.match(/([\d.]+?) 颗星，最多 5 颗星 +([\d,]+)/);
                             if (_group) {
                                 let _rating = _group[1];
                                 let _vote = _group[2];
- 
+
                                 $('#interest_sectl div.rating_amazon_cn').html(starBlock("亚马逊中国", book_url, _rating, _vote, 5)).show();
                             }
                         } else {
@@ -1377,13 +1702,13 @@ $(document).ready(function () {
                         $('#loading_more_rate').hide();
                     });
                 }
- 
+
                 if (GM_getValue('enable_book_goodreads', false) && GM_getValue('apikey_goodreads', false)) {
                     rating_more_hit = true;
                     getJSON(`https://www.goodreads.com/book/review_counts.json?key=${GM_getValue('apikey_goodreads', '')}&format=json&isbns=${isbn}`, function (data) {
                         try {
                             let book = data['books'][0];
- 
+
                             let goodread_id = book['id'];
                             let goodread_url = `https://www.goodreads.com/book/show/${goodread_id}`;
                             let rating = book['average_rating'];
@@ -1395,12 +1720,12 @@ $(document).ready(function () {
                         $('#loading_more_rate').hide();
                     });
                 }
- 
+
                 if (!rating_more_hit) {
                     $('#loading_more_rate').hide();
                 }
             }
- 
+
             if (_version === "完整版") {
                 site_map.push({
                     name: "会员精准匹配",
@@ -1632,54 +1957,54 @@ $(document).ready(function () {
                 ]
             });
         }
- 
+
         // 检查站点是否需要登陆的方法 res 应该是GM_xmlhttpRequests返回对象 ，返回bool值，true时为需要登陆
         function login_check(res) {
             let need_login = false;
             if (/login|verify|checkpoint|returnto/ig.test(res.finalUrl)) {
-                need_login = true;  // 检查最终的URL看是不是需要登陆
+                need_login = true; // 检查最终的URL看是不是需要登陆
             } else if (/refresh: \d+; url=.+login.+/ig.test(res.responseHeaders)) {
-                need_login = true;  // 检查responseHeader有没有重定向
+                need_login = true; // 检查responseHeader有没有重定向
             } else {
                 let responseText = res.responseText;
                 if (typeof responseText === "undefined") {
-                    need_login = true;  // 检查最终的Text，如果什么都没有也可能说明需要登陆
+                    need_login = true; // 检查最终的Text，如果什么都没有也可能说明需要登陆
                 } else if (responseText.length < 800 && /login|not authorized/.test(responseText)) {
-                    need_login = true;  // 对Text进行检查，断言“过短，且中间出现login字段”即说明可能需要登陆
+                    need_login = true; // 对Text进行检查，断言“过短，且中间出现login字段”即说明可能需要登陆
                 }
             }
             return need_login;
         }
- 
+
         function Exist_check(label) {
             let site = label.name;
             let psite = $(`a[data-name="${site}"]`);
- 
+
             function HideTag() {
                 if (GM_getValue('enable_adv_auto_hide',false)) {
                     $(psite).hide();
                 }
             }
- 
+
             function TagExist(link) {
                 $(psite).css("background-color", GM_getValue("tag_bcolor_exist", "#e3f1ed"));
                 $(psite).css("color", GM_getValue("tag_fcolor_exist", "#3377aa"));
                 $(psite).attr("title", "资源存在");
                 let storage_data = true;
-                if (label.rewrite_href && label.rewrite_href === true) {   // 重写链接
+                if (label.rewrite_href && label.rewrite_href === true) { // 重写链接
                     storage_data = cache.get(site, link || $(psite).attr("href"));
                     $(psite).attr("href", storage_data);
                 }
                 cache.add(site, storage_data);
             }
- 
+
             function TagNotExist() {
                 $(psite).css("background-color", GM_getValue("tag_bcolor_not_exist", "#f4eac2"));
                 $(psite).css("color", GM_getValue("tag_fcolor_not_exist", "#3377aa"));
                 $(psite).attr("title", "资源不存在");
                 HideTag();
             }
- 
+
             function TagNeedLogin() {
                 $(psite).css("background-color", GM_getValue("tag_bcolor_need_login", ""));
                 $(psite).css("color", GM_getValue("tag_fcolor_need_login", "#3377aa"));
@@ -1690,22 +2015,22 @@ $(document).ready(function () {
                 $(psite).attr("title", "站点需要登陆");
                 HideTag();
             }
- 
+
             function TagError(errtype) {
                 $(psite).css("background-color", GM_getValue("tag_bcolor_error", ""));
                 $(psite).css("color", GM_getValue("tag_fcolor_error", "#3377aa"));
                 $(psite).attr("title", "遇到问题" + (errtype ? (" - " + errtype) : ""));
                 HideTag();
             }
- 
+
             // 这里假定有这个资源的就一直都有，直接使用第一次请求成功的时候缓存信息
             if (cache.get(site)) { TagExist(); return; }
- 
+
             // 如果前次检查到这个站点需要登陆
             if (need_login_cache.get(site)) { TagNeedLogin(); return; }
- 
+
             // 不然，则请求相关信息
-            
+
             // 重写请求参数
             //if (typeof label.data === "object") {
             //    let myData = new FormData();
@@ -1714,7 +2039,7 @@ $(document).ready(function () {
             //    }
             //    label.data = myData;
             //}
- 
+
             // 请求核心方法
             function check_core(label) {
                 GM_xmlhttpRequest({
@@ -1722,31 +2047,31 @@ $(document).ready(function () {
                     url: label.ajax || label.link,
                     data: label.data,
                     headers: label.headers,
-                    timeout: 45e3,    // 默认45s服务器无响应算超时
+                    timeout: 45e3, // 默认45s服务器无响应算超时
                     onload: function (res) {
                         if (login_check(res)) {
                             TagNeedLogin();
                         } else {
-                            try {// 开始解析返回信息
+                            try { // 开始解析返回信息
                                 let responseText = res.responseText;
                                 if (label.type && ["json", "jsonp"].includes(label.type)) { // 如果前面定义了返回类型是"json'或者"jsonp"
                                     if (label.type === "jsonp") {
                                         responseText = responseText.match(/[^(]+\((.+)\)/)[1];
                                     }
                                     let par = JSON.parse(responseText);
-                                    if (eval("par." + label.selector)) {
+                                    if (getValueFromObject(par, label.selector)) {
                                         TagExist();
                                     } else {
                                         TagNotExist(); // 所有情况都失败则未存在
                                     }
-                                } else {  // 否则默认label.type的默认值为 html
+                                } else { // 否则默认label.type的默认值为 html
                                     let doc = page_parser(res.responseText);
                                     let body = doc.querySelector("body");
                                     // 因为jQuery的选择器丰富，故这里不用 dom.querySelector() 而用 jQuery.find()
                                     if (label.selector_need_login && $(body).find(label.selector_need_login).length) {
                                         TagNeedLogin(); // 如果存在selector_need_login选择器，则先判断是否存在以确定是否需要登录
                                     } else if ($(body).find(label.selector || "table.torrents:last > tbody > tr:gt(0)").length) {
-                                        TagExist(res.finalUrl);  // 最后使用selector选择器判断资源是否存在
+                                        TagExist(res.finalUrl); // 最后使用selector选择器判断资源是否存在
                                     } else {
                                         TagNotExist(); // 所有情况都失败则未存在
                                     }
@@ -1760,22 +2085,22 @@ $(document).ready(function () {
                     ontimeout: function () { TagError("请求超时"); },
                 });
             }
- 
-            // 请求动作方法        
+
+            // 请求动作方法
             function check_func() {
                 $(psite).attr("title", "正在请求信息中");
-                if (label.csrf) {  // 对某些启用了csrf的站点，先使用正常方式请求一次获取csrf值
+                if (label.csrf) { // 对某些启用了csrf的站点，先使用正常方式请求一次获取csrf值
                     GM_xmlhttpRequest({
                         method: "GET",
                         url: label.link,
-                        timeout: 45e3,    // 默认45s服务器无响应算超时
+                        timeout: 45e3, // 默认45s服务器无响应算超时
                         onload: function (res) {
                             if (!login_check(res)) {
                                 try {
                                     let doc = page_parser(res.responseText);
                                     let csrf_ = $(`input[name='${label.csrf.name}'`, doc);
-                                    let csrf_key = csrf_.attr("value");  // 获取csrf值
-                                    label[label.csrf.update] += `&${label.csrf.name}=${csrf_key}`;   // 更新对应选项
+                                    let csrf_key = csrf_.attr("value"); // 获取csrf值
+                                    label[label.csrf.update] += `&${label.csrf.name}=${csrf_key}`; // 更新对应选项
                                     check_core(label);
                                 } catch (e) {
                                     TagError("解析故障");
@@ -1789,20 +2114,20 @@ $(document).ready(function () {
                     check_core(label);
                 }
             }
-            
+
             // 根据设置，是自动请求还是鼠标移动时在做请求
             if (GM_getValue("enable_adv_auto_search", true)) {
-                check_func();     
+                check_func();
             } else {
-                $(psite).mouseenter(function(e){  // 鼠标进入时才自动搜索并反馈
-                    if ($(psite).attr('title') == 'empty') {  // 防止重复请求
+                $(psite).mouseenter(function(e){ // 鼠标进入时才自动搜索并反馈
+                    if ($(psite).attr('title') == 'empty') { // 防止重复请求
                         check_func();
                         $(psite).unbind('mouseenter');
                     }
                 });
             }
         }
- 
+
         function site_exist_status() {
             $("#drdm_req_status").show();
             for (let i = 0; i < site_map.length; i++) {
@@ -1811,7 +2136,7 @@ $(document).ready(function () {
                     continue;
                 }
                 $('#adv-sites').append(`<div class="c-aside name-offline" data-id="${i}"><h2><i>${map_dic.name}</i>· · · · · ·</h2><div class=c-aside-body style="padding: 0 12px;"> <ul class=bs > </ul> </div> </div>`);
- 
+
                 let in_site_html = $(`div[data-id='${i}'] ul.bs`);
                 for (let j = 0; j < map_dic.label.length; j++) {
                     let label = map_dic.label[j];
@@ -1820,19 +2145,19 @@ $(document).ready(function () {
                     }
                     in_site_html.append(`<a href="${label.link}" data-name="${label.name}" target="_blank" rel="nofollow" class="name-offline" title="empty">${label.name}</a>`);
                     Exist_check(label);
-                    
+
                 }
             }
- 
+
             update_status_interval = window.setInterval(update_req_status, 1e3);
- 
+
             if (!GM_getValue("enable_adv_auto_search", true)) {
                 $("#drdm_req_status_hide").click();
             }
         }
         site_exist_status();
     }
- 
+
     // 脚本页面切换方法
     function wrapper_change(id, html, callback) {
         if ($(`div#wrapper > div#${id}`).length === 0) {
@@ -1845,7 +2170,7 @@ $(document).ready(function () {
         ele_inst.siblings("div").hide();
         ele_inst.show();
     }
- 
+
     // 加载豆列搜索
     if (GM_getValue("enable_doulist_search", true)) {
         $('div.nav-items ul').append('<li><a id="search_dlist" href="javascript:void(0);">豆列搜索</a></li>');
@@ -1870,17 +2195,17 @@ $(document).ready(function () {
                                 result.each(function () {
                                     let title = $(this).find("a[href^='https://www.douban.com/doulist/']");
                                     let caption = $(this).find("div.b_caption");
- 
+
                                     let id = title.attr("href").match(/doulist\/(\d+)/)[1];
                                     let title_clean = title.text().replace(/(\(豆瓣\)|\s-\s豆瓣电影|\s-\s豆瓣)/, '').replace(/ - douban.com/, '');
                                     caption.find("div.b_attribution").remove();
                                     let detail = caption.html();
- 
-                                    if ($(`div.movie-list > div[data-dlist=${id}]`).length === 0) {  // 重复的不再插入
+
+                                    if ($(`div.movie-list > div[data-dlist=${id}]`).length === 0) { // 重复的不再插入
                                         $('div.movie-list').append(`<div data-dlist="${id}"><div><h2 style="font-size:13px;"><a href="https://www.douban.com/doulist/${id}" target="_blank">${title_clean}</a></h2><div></div></div><div class="tags">${detail}<p class="ul"></p></div></div>`);
                                     }
                                 });
- 
+
                                 // 更新加载信息
                                 let load_id = page + 10;
                                 load_more.text('加载更多');
@@ -1895,8 +2220,8 @@ $(document).ready(function () {
             });
         });
     }
- 
- 
+
+
     // 脚本设置
     $("#db-global-nav > div > div.top-nav-info").append(`<a href="javascript:;" id="drdm_setting_btn">脚本设置</a>`);
     $("#drdm_setting_btn").click(function () {
@@ -1904,10 +2229,12 @@ $(document).ready(function () {
         wrapper_change("drdm_setting", int_html, function () {
             // TODO 评分信息，豆列搜索等杂项功能启用情况
             let config_setting = "<h1>脚本基本功能启用状况</h1><dl class='drdm-dl-horizontal'>";
- 
+
             function config_setting_gen(name, key, note, def = true) {
                 config_setting += `<dt>${name}</dt><dd><input type="checkbox" id="drdm_config_${key}" ${GM_getValue(key, def) ? 'checked' : ''} data-config="${key}"><label for="drdm_config_${key}"></label> ${note} </dd>`;
             }
+
+            config_setting_gen("额外样式", "enable_extra_stylesheet", "注入一些额外的CSS样式屏蔽豆瓣广告等", true);
             config_setting_gen("豆列搜索", "enable_doulist_search", "对豆列进行搜索（通过\`cn.bing.com\`搜索）");
             config_setting_gen("电影简介生成", "enable_mediainfo_gen", "生成符合PT站点电影简介信息（Mediainfogen格式）", false);
             config_setting_gen("各类排行榜", "enable_top_rang_tag", `显示来自 <a href="https://github.com/bimzcy/rank4douban">bimzcy/rank4douban</a> 的各种排行榜`);
@@ -1920,9 +2247,9 @@ $(document).ready(function () {
             config_setting_gen("蓝光发售日", "enable_blue_date", "展示蓝光的发售日期(来自IMDb)");
             config_setting_gen("亚马逊图书评分", "enable_book_amazon.cn_rate", `展示在<a href="https://www.amazon.cn/" target="_blank">亚马逊中国</a> 上有对应ISBN信息的图书评分信息`);
             config_setting_gen("GoodReads图书评分","enable_book_goodreads",`展示在 <a href="https://www.goodreads.com" target="_blank">GoodReads</a> 上有对应ISBN信息的图书评分信息，设置你的APIKEY: <input id='drdm_setting_apikey_goodreads' type='text' value='${GM_getValue('apikey_goodreads','')}'></input> (<a href='//blog.rhilip.info/archives/1124/' target='_blank'>说明</a>)`,false);
- 
+
             config_setting += `</dl><br>`;
- 
+
             // 构造站点启用信息
             let setting_site = "<h1>搜索站点启用情况(在当前页面条件下)</h1>";
             for (let i = 0; i < site_map.length; i++) {
@@ -1946,7 +2273,7 @@ $(document).ready(function () {
                     $(`input[id^='drdm_config_site_'][data-type='site'][data-par=${par}]`).prop("disabled", !that.prop("checked")).prop("checked", that.prop("checked"));
                 }
             });
- 
+
             // 其他回调
             $('input#drdm_setting_apikey_goodreads').on('input change',function () {
                 let that = $(this);
