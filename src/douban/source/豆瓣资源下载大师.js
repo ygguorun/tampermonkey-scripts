@@ -20,7 +20,7 @@
 // @include        https://bangumi.moe/search/title*
 // @include        https://desitorrents.tv/*
 // @include        http://www.dingzi66.com/q*
-// @version        8.0.0
+// @version        8.0.1
 // @icon           https://img3.doubanio.com/favicon.ico
 // @run-at         document-end
 // @namespace      doveboy_js
@@ -1368,7 +1368,7 @@ $(document).ready(function () {
                     { name: '第一电影网', link: 'https://www.001d.com/?s=' + dbzw, selector: 'div.mainleft div.info' },
                     { name: '就爱那片', method: "post", link: 'http://www.inapian.com/index.php?s=vod-search&wd=' + dbzw, data: `wd=${unititle}`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: 'div.sortcon div.minfo' },
                     { name: '泡饭影视', link: 'http://www.chapaofan.com/search/' + dbzw, selector: 'div.content-side-left div.content-title + div.content-title' },
-                    { name: '片源网', link: 'http://pianyuan.la/search?q=' + dbzw, selector: 'div.row ul.detail' },
+                    { name: '片源网', link: 'http://pianyuan.org/search?q=' + dbzw, selector: 'div.row ul.detail' },
                     { name: '迅雷影天堂', link: 'https://www.xl720.com/?s=' + dbzw, selector: '#content h3.entry-title' },
                     { name: '一只大榴莲', link: 'http://www.llduang.com/?s=' + dbzw, selector: 'div.mainleft div.info' },
                     { name: '音范丝', link: 'http://www.yinfans.me/?s=' + dbzw, selector: '#post_container div.article' },
@@ -1742,17 +1742,14 @@ $(document).ready(function () {
                         { name: "Obook", method: "post", type: "json", link: "http://www.obook.vip/books/?s=" + title, ajax: "http://www.obook.vip/keys/get_ebook_list_search.asmx/getSearchList", data: `{skey:'${title}'}`, headers: { "Content-Type": "application/json; charset=UTF-8" }, selector: "d.length > 0" },
                         { name: "skEbooks", link: "https://skebooks.com/q?type=1&keyword=" + title, selector: "tbody a.book-tip" },
                         { name: "爱分享读书", link: "http://www.ishareread.com/searchbook.htm?keyWords=" + title, selector: `div.searchbooklist_bookitem div.author_container:contains(${writer.trim()})` },
-                        { name: "拜读", link: "http://orzbook.com/?s=" + title + writer, selector: "#primary div.entry-content" },
+                        { name: "拜读", link: "http://orzbd.com/?s=" + title + writer, selector: "#primary div.entry-content" },
                         { name: "必看网", link: "https://www.biikan.com/home/book/search.shtml?k=" + title, selector: "div.bookList.clearfix a.bookListImg" },
-                        { name: "缤闹", method: "post", link: "http://www.binnao.com/search.php?mod=forum", data: `srchtxt=${title}${writer}&searchsubmit=yes`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "#threadlist li.pbw" },
-                        { name: '布克书屋', link: 'https://www.bukebook.cn/?s=' + title, selector: `a[rel='bookmark']:contains(${title})` },
                         { name: "点书网", method: "post", link: "http://dianbook.cc/search.php?mod=forum", data: `srchtxt=${title}${writer}&searchsubmit=yes`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "div.tl li.pbw" },
-                        { name: "看豆178", link: "http://www.seo630.com/search.aspx?book=" + title, selector: "div.search-list div.book" },
                         { name: "慢慢游书", link: 'https://www.manmanyou.net/search.php?mod=forum&searchsubmit=yes&srchtxt=' + title, selector: "div.tl li.pbw", selector_need_login: "#messagelogin" },
                         { name: "万千合集站", link: "http://www.hejizhan.com/bbs/?kw=" + title, selector: "div.container p.title" },
-                        { name: "我的书屋", method: "post", link: "http://www.wode5.com/e/search/index.php", data: `tbname=book&tempid=1&show=title%2Csoftwriter%2Csoftsay&ecmsfrom=9&keyboard=${title}&submit=`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "div.am-u-sm-9.search-content div.item_info.am-fl", selector_need_login: "div[align='center'] > b:contains('权限')" },
                         { name: "我要读PDF", method: "post", link: "http://www.51dupdf.com/search.php?mod=forum", data: `srchtxt=${gtitle}&searchsubmit=yes`, headers: { "Content-Type": "application/x-www-form-urlencoded" }, rewrite_href: true, selector: "div.tl li.pbw" },
                         { name: "盘乐网书", link: 'https://www.panle.net/search.php?mod=forum&searchsubmit=yes&srchtxt=' + title, selector: "div.tl li.pbw" },
+                        { name: "星空好书", link: 'https://www.goodepub.com/?s=' + title, selector: "h2.entry-title" },
                     ]
                 });
             }
